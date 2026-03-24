@@ -1,15 +1,17 @@
-from openai import OpenAI
+from groq import Groq
 from django.conf import settings
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-OPENAI_API_KEY = settings.OPENAI_API_KEY
-client = OpenAI(api_key=OPENAI_API_KEY)
+GROQ_API_KEY = settings.GROQ_API_KEY 
+client = Groq(api_key=GROQ_API_KEY)
 
 def load_system_prompt():
-    with open("prompts/unihelp_template.md", "r", encoding="utf-8") as f:
-        return f.read()
-    
+    try:
+        with open("prompts/unihelp_template.md", "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return "You are a helpful university assistant."
 
 @api_view(["POST"])
 def chat_with_unihelp(request):
@@ -17,8 +19,7 @@ def chat_with_unihelp(request):
         SYSTEM_TEMPLATE = load_system_prompt()
         user_message = request.data.get("message", "")
 
-        # Construct the new "input" format
-        prompt_input = [
+        messages_history = [
             {
                 "role": "system",
                 "content": SYSTEM_TEMPLATE
@@ -29,20 +30,19 @@ def chat_with_unihelp(request):
             }
         ]
 
-        response = client.responses.create(
-            model="gpt-5.1",
-            input=prompt_input,
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=messages_history,
             temperature=0.4,
-            max_output_tokens=600,
+            max_tokens=600,
         )
 
-        # Extract model response
-        answer = response.output_text
+        answer = response.choices[0].message.content
 
         return Response({"response": answer})
 
     except Exception as e:
         return Response(
-            {"error": f"An unexpected error occurred. {str(e)}"},
+            {"error": f"Something went wrong: {str(e)}"},
             status=500
         )
