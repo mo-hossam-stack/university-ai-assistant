@@ -1,126 +1,215 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import popSound from "@/assets/sounds/Pop.mp3";
-import notificationSound from "@/assets/sounds/Notify.mp3";
-import ReactMarkdown from "react-markdown";
-import { Button } from "../ui/button";
-import { FaArrowUp } from "react-icons/fa";
-import TypingIndicator from "./TypingIndicator";
-import { promptOpenai } from "@/lib/services/api";
+import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react"
+import { MessageBubble } from "./MessageBubble"
+import { WelcomeScreen } from "./WelcomeScreen"
+import { ChatInput } from "./ChatInput"
+import TypingIndicator from "./TypingIndicator"
+import { Toast } from "../common/Toast"
+import { promptOpenai } from "@/lib/services/api"
+import { sanitizeInput } from "@/lib/utils"
+import { ArrowLeft, Trash2 } from "lucide-react"
+import { Button } from "../ui/button"
 
-// Initialize audio
-const popAudio = new Audio(popSound);
-popAudio.volume = 0.2;
-
-const notificationAudio = new Audio(notificationSound);
-notificationAudio.volume = 0.2;
-
-// Message interface
 interface Message {
-  content: string;
-  role: "user" | "bot";
+  id: string
+  content: string
+  role: "user" | "bot"
+  timestamp: Date
 }
 
-const ChatBot = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [prompt, setPrompt] = useState("");
-  const [isBotTyping, setIsBotTyping] = useState(false);
-  const [error, setError] = useState("");
-  const lastMessageRef = useRef<HTMLDivElement | null>(null)
+interface ToastState {
+  message: string
+  type: "error" | "success" | "info"
+  key: number
+}
+
+interface ChatBotProps {
+  goHomeRef?: MutableRefObject<(() => void) | null>
+}
+
+const MAX_MESSAGES = 50
+
+const ChatBot = ({ goHomeRef }: ChatBotProps) => {
+  const [messages, setMessages] = useState<Message[]>([])
+  const [prompt, setPrompt] = useState("")
+  const [isBotTyping, setIsBotTyping] = useState(false)
+  const [toast, setToast] = useState<ToastState | null>(null)
+  const [showWelcome, setShowWelcome] = useState(true)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    lastMessageRef.current?.scrollIntoView({behavior: "smooth"})
-  }, [messages])
+    if (goHomeRef) {
+      goHomeRef.current = handleGoHome
+    }
+  }, [goHomeRef])
 
-  function passPrompt(){
-    setMessages((curr) => [...curr, { content: prompt, role: "user" }]);
-    handlePromptOpenai()
+  const hasMessages = messages.length > 0
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({ behavior })
+  }, [])
+
+  useEffect(() => {
+    if (hasMessages) {
+      scrollToBottom()
+    }
+  }, [messages, hasMessages, scrollToBottom])
+
+  const showToast = useCallback((message: string, type: ToastState["type"] = "error") => {
+    setToast({ message, type, key: Date.now() })
+  }, [])
+
+  const hideToast = useCallback(() => {
+    setToast(null)
+  }, [])
+
+  const handleGoHome = useCallback(() => {
+    setShowWelcome(true)
+    setMessages([])
     setPrompt("")
-    popAudio.play()
-  }
+  }, [])
 
-  function handlePrompting(e: React.FormEvent) {
-    e.preventDefault();
-    passPrompt()
+  const handleBack = useCallback(() => {
+    handleGoHome()
+  }, [handleGoHome])
 
-    
-    
-  }
+  const handleClearChat = useCallback(() => {
+    handleGoHome()
+    showToast("Chat cleared", "success")
+  }, [handleGoHome, showToast])
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const sendMessage = useCallback(
+    async (messageText: string) => {
+      if (!messageText.trim() || isBotTyping) return
 
-      passPrompt()
-    }
-  };
+      setShowWelcome(false)
 
+      const userMessage: Message = {
+        id: `user-${Date.now()}`,
+        content: sanitizeInput(messageText),
+        role: "user",
+        timestamp: new Date(),
+      }
 
-  async function handlePromptOpenai(){
-    setIsBotTyping(true)
-    try{
-        const response = await promptOpenai({message: prompt})
-        console.log(response)
-        setMessages(curr => [...curr, {content: response.response, role: "bot"}])
-        setError("")
-        notificationAudio.play()
-    }
-    catch(err: unknown){
-        if(err instanceof Error ){
-            setError(err.message)
+      setMessages((prev) => {
+        const newMessages = [...prev, userMessage]
+        if (newMessages.length > MAX_MESSAGES) {
+          return newMessages.slice(-MAX_MESSAGES)
         }
-    }
-    finally{
+        return newMessages
+      })
+
+      setPrompt("")
+      setIsBotTyping(true)
+      scrollToBottom("instant")
+
+      try {
+        const response = await promptOpenai({ message: messageText })
+
+        const botMessage: Message = {
+          id: `bot-${Date.now()}`,
+          content: response.response,
+          role: "bot",
+          timestamp: new Date(),
+        }
+
+        setMessages((prev) => [...prev, botMessage])
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Something went wrong"
+        showToast(errorMessage, "error")
+      } finally {
         setIsBotTyping(false)
+        scrollToBottom()
+      }
+    },
+    [isBotTyping, showToast, scrollToBottom]
+  )
+
+  const handleSubmit = useCallback(() => {
+    if (prompt.trim()) {
+      sendMessage(prompt)
     }
-  }
+  }, [prompt, sendMessage])
+
+  const handleSelectTopic = useCallback(
+    (topic: string) => {
+      sendMessage(topic)
+    },
+    [sendMessage]
+  )
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Messages container */}
-      <div className="flex flex-col flex-1 gap-3 mb-10 overflow-y-auto">
-        <div className="flex flex-col gap-3">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              ref={index === messages.length - 1 ? lastMessageRef : null}
-              className={`px-3 py-1 max-w-md rounded-xl ${
-                message.role === "user"
-                  ? "bg-blue-600 text-white self-end"
-                  : "bg-gray-100 text-black self-start"
-              }`}
-            >
-              <ReactMarkdown>{message.content}</ReactMarkdown>
-            </div>
-          ))}
+    <div className="flex flex-col h-full bg-background">
+      {hasMessages && !showWelcome && (
+        <div className="flex items-center justify-between px-4 py-2 border-b bg-card flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back</span>
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            {messages.length} message{messages.length !== 1 ? "s" : ""}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClearChat}
+            className="text-muted-foreground hover:text-destructive gap-1.5"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Clear</span>
+          </Button>
         </div>
+      )}
 
-        {isBotTyping && <TypingIndicator />}
-        {error && <p className="text-red-500">{error}</p>}
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="max-w-2xl mx-auto px-4 py-4">
+          {showWelcome && !hasMessages && !isBotTyping && (
+            <WelcomeScreen onSelectTopic={handleSelectTopic} />
+          )}
+
+          <div className="space-y-4">
+            {messages.map((message) => (
+              <MessageBubble
+                key={message.id}
+                content={message.content}
+                role={message.role}
+                timestamp={message.timestamp}
+              />
+            ))}
+          </div>
+
+          {isBotTyping && <TypingIndicator />}
+
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
-      {/* Input area */}
-      <form
-        className="flex flex-col gap-2 items-end border-2 p-4 rounded-3xl"
-        onSubmit={handlePrompting}
-        onKeyDown={handleKeyDown}
-      >
-        <textarea
-          className="w-full border-0 focus:outline-0 resize-none"
-          placeholder="Ask anything"
-          maxLength={1000}
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          autoFocus
-        />
-        <Button
-          disabled={prompt.trim().length < 1}
-          className="rounded-full w-9 h-9"
-        >
-          <FaArrowUp />
-        </Button>
-      </form>
-    </div>
-  );
-};
+      <div className="flex-shrink-0 border-t bg-card px-4 py-3 safe-area-bottom">
+        <div className="max-w-2xl mx-auto">
+          <ChatInput
+            value={prompt}
+            onChange={setPrompt}
+            onSubmit={handleSubmit}
+            isLoading={isBotTyping}
+            maxLength={1000}
+          />
+        </div>
+      </div>
 
-export default ChatBot;
+      {toast && (
+        <Toast
+          key={toast.key}
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
+    </div>
+  )
+}
+
+export default ChatBot
