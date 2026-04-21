@@ -1,0 +1,26 @@
+{
+  "title": "Academic Calendar",
+  "facts": [
+    "Year: Sem1 + Sem2 (16wks each incl. exams) + optional Summer (8wks incl. exams)",
+    "Bachelor: 4yrs standard (8 sems); max 8yrs; early finish allowed",
+    "Sems 1–4: common curriculum (all programs); Sem5+: specialization (CS/IS/IT/DS)",
+    "Levels by credit hrs: Freshman 0–36 | Sophomore 37–72 | Junior 73–108 | Senior 109–144",
+    "Field training: summer after Junior Sem2",
+    "Registration: opens pre-semester; late window: Week1; dean extension: before Week2 end",
+    "Add/Drop: Weeks 1–2",
+    "Withdrawal: no council→Week4 end | with College Council→Week12 end",
+    "Interruption: up to 2yrs (consec. or not) with approved excuse, submitted before/during sem",
+    "Absent 4yrs without excuse→dismissal (College Council + President approval required)",
+    "Summer counts toward academic warning calculation",
+    "Advisor assigned from enrollment to graduation",
+    "Calendar & all deadlines: www.nub.edu.eg"
+  ],
+  "faq": [
+    {"q": "How long is the Bachelor's?", "a": "4yrs standard, max 8yrs, early finish allowed."},
+    {"q": "When does specialization start?", "a": "Sem5. Sems 1–4 common for all."},
+    {"q": "Can I take a study break?", "a": "Yes, up to 2yrs with College Council excuse (submitted before/during sem)."},
+    {"q": "What if I stop without excuse?", "a": "Absent 4yrs without council excuse→dismissed."},
+    {"q": "Key semester deadlines?", "a": "Late reg: Week1. Dean extension: Week2. Withdrawal: Week4 (no council) or Week12 (with council)."},
+    {"q": "Where's the calendar?", "a": "www.nub.edu.eg"}
+  ]
+}
