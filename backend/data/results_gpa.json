@@ -1,0 +1,41 @@
+{
+  "title": "Results and GPA",
+  "facts": [
+    "Term GPA: Σ(grade_points × cr) ÷ total registered cr | CGPA: same across ALL courses; rounded to 2 decimals",
+    "Grade scale: A 95-100=4.0 | A- 90=3.7 | B+ 85=3.3 | B 80=3.0 | B- 75=2.7 | C+ 70=2.3 | C 65=2.0 | C- 60=1.7 | D+ 55=1.3 | D 50=1.0 | F <50=0 | FR <30=0",
+    "FR: score <30%; same GPA points as F but indicates very weak performance",
+    "CGPA classification: ≥3.7=Excellent | 3.0-3.69=Very Good | 2.3-2.99=Good | 2.0-2.29=Pass | 1.0-1.69=Weak | <1.0=Very Weak",
+    "Excluded from CGPA: P/F | I | W | AU | IP | TC",
+    "Assessment — Theoretical: Midterm 25% + Coursework 25% + Final 50%",
+    "Assessment — Practical: Midterm 25% + Lab 15% + Coursework 10% + Final 50%",
+    "Assessment — Project: Coursework+practical 40% + Oral+report 60% (no written exam; 2-faculty committee, 1 external min)",
+    "Coursework includes: quizzes, assignments, theory, practical, research, attendance",
+    "Incomplete(I): must complete within 2wks after last exam of semester; else→F; counts in semester load",
+    "I under academic warning: cannot register next semester unless resolved before late registration deadline",
+    "Results approval: semester→College Council | graduation→University Council",
+    "Honor List: semester GPA≥3.3 + min load + no failures that semester",
+    "Graduation with honors: CGPA≥3.7 + no failures in entire study",
+    "Honor List + honors permanently recorded on transcript",
+    "Academic warning: CGPA<2.0 (excludes 1st ever semester + summer semesters)",
+    "Warning max load: CGPA<1.5→6cr | 1.5-<1.75→9cr | 1.75-<2.0→12cr",
+    "Warning: 2 semesters to raise CGPA≥2.0; summer counts; failure→dismissed from specialization/college",
+    "Exception: final semester student exempt from warning dismissal",
+    "Dismissed from spec: may transfer to another if accepted; else dismissed from college",
+    "Warning notification: registered letter to student's recorded address",
+    "Repeat course: latest grade counts in CGPA; cr not doubled; max 12cr repeatable total",
+    "Retry limits: up to 4 attempts; 1st fail ignored in CGPA if improved on 1st retry; 3rd/4th retry min grade=C",
+    "Graduation: CGPA≥2.0 + 146cr + field training"
+  ],
+  "faq": [
+    {"q":"GPA formula?","a":"Σ(grade_points × cr) ÷ total cr. Example: B(3.0)×3cr + A(4.0)×2cr = 17÷5 = 3.4"},
+    {"q":"Grade points?","a":"A=4.0|A-=3.7|B+=3.3|B=3.0|B-=2.7|C+=2.3|C=2.0|C-=1.7|D+=1.3|D=1.0|F=FR=0"},
+    {"q":"F vs FR?","a":"Both=0 pts. FR means score<30% (very weak). F means 0-49%."},
+    {"q":"Grades excluded from CGPA?","a":"P/F, I, W, AU, IP, TC"},
+    {"q":"Min GPA to graduate?","a":"CGPA≥2.0 + 146cr + field training"},
+    {"q":"Incomplete(I) grade?","a":"Complete within 2wks after last exam of semester; else becomes F"},
+    {"q":"Honor List?","a":"Semester GPA≥3.3 + min load + no failures that semester"},
+    {"q":"Graduate with honors?","a":"CGPA≥3.7 + zero failures throughout entire study"},
+    {"q":"Academic warning limits?","a":"2 sems to fix. Max load: <1.5→6cr | 1.5-1.74→9cr | 1.75-1.99→12cr"},
+    {"q":"Repeating a course?","a":"Latest grade counts; max 12cr repeatable; up to 4 attempts; 3rd/4th attempt min grade=C"}
+  ]
+}

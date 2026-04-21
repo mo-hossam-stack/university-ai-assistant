@@ -1,0 +1,21 @@
+{
+  "title": "Fees and Payments",
+  "facts": [
+    "Tuition: set by University Council; changes annually→contact registrar/finance for current amounts",
+    "Late registration fee: applies even with dean approval; amount set by University Council",
+    "Study suspension fee: applies on formal interruption request",
+    "Withdrawal from university: must settle all tuition/fees per University Council rules",
+    "Re-enrollment fee: applies on re-admission after dismissal",
+    "Scholarships: granted to academically distinguished students per University Council + Board of Trustees system",
+    "Disciplinary financial penalties: may apply per Law 49/1972",
+    "All fee amounts subject to change→direct inquiries to finance/registrar office"
+  ],
+  "faq": [
+    {"q":"Tuition amount?","a":"Set by University Council; changes yearly. Contact registrar/finance for current figures."},
+    {"q":"Late registration fee?","a":"Yes, applies after deadline even with dean approval. Contact registrar for amount."},
+    {"q":"Fee for study break?","a":"Yes, suspension fee applies. Contact finance office."},
+    {"q":"Withdrawal fees?","a":"Must settle all outstanding fees. Contact registrar."},
+    {"q":"Scholarships?","a":"Yes, for academically distinguished students. Contact student affairs for eligibility."},
+    {"q":"Re-admission fees?","a":"Yes, re-enrollment fee applies. Contact finance office."}
+  ]
+}

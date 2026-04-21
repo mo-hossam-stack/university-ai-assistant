@@ -1,0 +1,27 @@
+{
+  "title": "Exams and Timetable",
+  "facts": [
+    "Exam types: midterm + coursework + practical/lab (if applicable) + final",
+    "Final exam: 50% of grade | Duration: 1hr per credit (3cr=3hrs)",
+    "Theoretical: Midterm 25% + Coursework 25% + Final 50%",
+    "Practical: Midterm 25% + Lab 15% + Coursework 10% + Final 50%",
+    "Project: no written exam; Coursework 40% + Oral/presentation 60%; committee of 2 faculty (1 external min) + supervisor",
+    "Coursework 50% includes: quizzes, exercises, theory, practical, research, attendance",
+    "Timetable: published in annual calendar at www.nub.edu.eg",
+    "Missed midterm WITH excuse: submit to dean within 1wk→makeup arranged with dept head",
+    "Missed midterm WITHOUT excuse: zero for midterm component",
+    "Missed final WITH excuse (within 1wk): grade=Incomplete(I); must complete within 2wks after last exam of semester; requires instructor confirmation of potential pass + attendance within limit",
+    "Missed final WITHOUT excuse: zero for final component; grade calculated accordingly",
+    "Semester results: approved by College Council | Graduation results: approved by University Council",
+    "Summer exams: within 8-week duration"
+  ],
+  "faq": [
+    {"q":"Final exam duration?","a":"1hr per credit hour (3cr=3hrs)"},
+    {"q":"Final exam weight?","a":"50% of total grade"},
+    {"q":"Missed midterm?","a":"Submit excuse to dean within 1wk→makeup scheduled. No excuse→zero"},
+    {"q":"Missed final?","a":"With excuse(1wk): grade=I; complete within 2wks post-semester. No excuse→zero on final"},
+    {"q":"Project exam?","a":"No written exam; oral+report+practical to 2-faculty committee (1 external); oral/report=60%, coursework=40%"},
+    {"q":"Incomplete(I) conditions?","a":"Valid excuse + instructor confirms potential pass + absence ≤25%"},
+    {"q":"Who approves results?","a":"College Council (semester) | University Council (graduation)"}
+  ]
+}

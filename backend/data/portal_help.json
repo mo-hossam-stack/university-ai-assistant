@@ -1,0 +1,39 @@
+{
+  "title": "Portal and Student Services Help",
+  "facts": [
+    "Academic advisor: assigned from enrollment to graduation; consult before each semester registration",
+    "Advisor approves: registration, load changes, add/drop, co-req enrollment",
+    "Dept head approves: late registration, co-req, withdrawal",
+    "Dean approves: late reg after Week1, withdrawal after Week4, special cases",
+    "College Council approves: study interruption, withdrawal after Week12, re-enrollment, dismissal appeals",
+    "University Council approves: graduation results, certificates, fee structures",
+    "Website: www.nub.edu.eg (calendar, announcements, results)",
+    "Admission: General Secondary Certificate (Science stream) or foreign equivalent + medical fitness exam (no infectious diseases)",
+    "Transfer from other universities: allowed if min admission score met + Science stream cert + not in graduation year; dept evaluates transfer credits; new academic record created",
+    "Transfer from military/police colleges: allowed for non-disciplinary dismissal or exhausted failure attempts; admitted as new student at matching level",
+    "Specialization change: before 108cr completed (Junior); requires new dept council + College Council approval; follows new program from approval date; special cases may allow Senior year change",
+    "Dismissal from specialization (after 2 sem warning): may transfer to another spec if accepted; else dismissed from college",
+    "College dismissal: requires College Council + University President approval; student notified by registered letter",
+    "Re-enrollment after dismissal: College Council approval + min 2yr wait; re-admitted as external (practicals only); load excludes prev failed courses; re-enrollment fee applies",
+    "Specialization change or re-enrollment: student follows new program regulations from approval year",
+    "Special case (non-degree) student: takes specific courses only; cannot complete degree; fees/course limits set by University Council",
+    "Visiting students from other universities: may study specific courses at NUB with home institution approval",
+    "Graduation certificate: issued after University Council approval; signed by dean; honors recorded if applicable",
+    "Departments: CS | IS | IT | DS",
+    "College Council: official authority for interpreting regulations",
+    "All students responsible for knowing published regulations; ignorance not accepted"
+  ],
+  "faq": [
+    {"q":"Admission requirements?","a":"Science stream General Secondary (or foreign equiv) + medical fitness exam"},
+    {"q":"Transfer from another university?","a":"Yes if: min admission score met + Science stream + not graduation year. Dept evaluates which credits apply."},
+    {"q":"Transfer from military/police college?","a":"Yes if non-disciplinary dismissal or exhausted failures; admitted as new student at matching credit level"},
+    {"q":"Who is my academic advisor?","a":"Assigned from day one to graduation. Must consult before each semester registration for schedule, load, and academic issues."},
+    {"q":"Change specialization?","a":"Before 108cr (Junior level); new dept council + College Council approval. Special cases: may allow Senior year start."},
+    {"q":"Dismissed from specialization?","a":"Can transfer to another spec if accepted. If not→dismissed from college."},
+    {"q":"Re-enroll after college dismissal?","a":"Yes, after 2yr min + College Council approval. External student (practicals only), restricted load, re-enrollment fee."},
+    {"q":"Graduation certificate?","a":"Issued after University Council approves results; signed by dean. Requires 146cr + CGPA≥2.0 + field training."},
+    {"q":"Non-degree student?","a":"Takes specific courses only; cannot complete full degree; limits/fees set by University Council."},
+    {"q":"Departments in college?","a":"CS, IS, IT, DS"},
+    {"q":"Official announcements?","a":"www.nub.edu.eg — students responsible for knowing all published regulations."}
+  ]
+}
