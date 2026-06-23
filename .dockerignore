@@ -1,0 +1,14 @@
+.venv
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+.env
+db.sqlite3
+.idea
+.vscode
+*.md
+.DS_Store
+frontend/node_modules
+frontend/dist
