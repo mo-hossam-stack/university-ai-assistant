@@ -88,7 +88,7 @@ export async function promptOpenai(data: ChatRequest): Promise<ChatResponse> {
   }
 
   const response = await apiClient.post<ChatResponse>(
-    "/ai/chat_with_unihelp/",
+    "/api/chat_with_unihelp/",
     { message: sanitizedMessage },
     config
   )
