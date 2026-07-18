@@ -43,22 +43,31 @@ const MessageBubble = memo(function MessageBubble({
   const isUser = role === "user"
 
   return (
+    /*
+     * Each message is an article with a descriptive aria-label that
+     * combines the sender role and the timestamp, giving screen reader
+     * users full context without relying on visual layout alone.
+     */
     <div
       className={cn(
         "flex gap-2 w-full animate-slide-up",
         isUser ? "flex-row-reverse" : "flex-row"
       )}
+      role="article"
+      aria-label={`${isUser ? "You" : "Assistant"}${formattedTime ? ` at ${formattedTime}` : ""}`}
     >
+      {/* Avatar icon — decorative, sender identified by aria-label above */}
       <div
         className={cn(
           "flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg",
           isUser ? "bg-primary" : "bg-secondary"
         )}
+        aria-hidden="true"
       >
         {isUser ? (
-          <User className="w-4 h-4 text-primary-foreground" />
+          <User className="w-4 h-4 text-primary-foreground" aria-hidden="true" />
         ) : (
-          <Bot className="w-4 h-4 text-secondary-foreground" />
+          <Bot className="w-4 h-4 text-secondary-foreground" aria-hidden="true" />
         )}
       </div>
 
@@ -96,9 +105,17 @@ const MessageBubble = memo(function MessageBubble({
           </div>
         </div>
         {formattedTime && (
-          <span className="text-[10px] text-muted-foreground px-1">
+          /*
+           * aria-hidden hides the visible timestamp from the a11y tree
+           * because the timestamp is already included in the parent
+           * article’s aria-label. Prevents double-announcement.
+           */
+          <time
+            aria-hidden="true"
+            className="text-[10px] text-muted-foreground px-1"
+          >
             {formattedTime}
-          </span>
+          </time>
         )}
       </div>
     </div>

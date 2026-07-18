@@ -140,32 +140,54 @@ const ChatBot = ({ goHomeRef }: ChatBotProps) => {
   return (
     <div className="flex flex-col h-full bg-background">
       {hasMessages && !showWelcome && (
-        <div className="flex items-center justify-between px-4 py-2 border-b bg-card flex-shrink-0">
+        <div
+          className="flex items-center justify-between px-4 py-2 border-b bg-card flex-shrink-0"
+          role="toolbar"
+          aria-label="Chat controls"
+        >
+          {/* Back button: min 44×44px touch target */}
           <Button
             variant="ghost"
             size="sm"
             onClick={handleBack}
-            className="gap-1.5 text-muted-foreground hover:text-foreground"
+            className="gap-1.5 text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px]"
+            aria-label="Back to home"
+            type="button"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" aria-hidden="true" />
             <span className="hidden sm:inline">Back</span>
           </Button>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-muted-foreground" aria-live="polite" aria-atomic="true">
             {messages.length} message{messages.length !== 1 ? "s" : ""}
           </span>
+          {/* Clear button: min 44×44px touch target */}
           <Button
             variant="ghost"
             size="sm"
             onClick={handleClearChat}
-            className="text-muted-foreground hover:text-destructive gap-1.5"
+            className="text-muted-foreground hover:text-destructive gap-1.5 min-h-[44px] min-w-[44px]"
+            aria-label="Clear chat history"
+            type="button"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-4 h-4" aria-hidden="true" />
             <span className="hidden sm:inline">Clear</span>
           </Button>
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto min-h-0">
+      {/*
+        role="log" declares this as a live region containing a sequence of
+        messages. aria-live="polite" ensures screen readers announce new
+        messages without interrupting the user (WCAG 4.1.3).
+        aria-label provides an accessible name for the landmark.
+      */}
+      <div
+        className="flex-1 overflow-y-auto min-h-0"
+        role="log"
+        aria-live="polite"
+        aria-label="Chat messages"
+        aria-relevant="additions"
+      >
         <div className="max-w-2xl mx-auto px-4 py-4">
           {showWelcome && !hasMessages && !isBotTyping && (
             <WelcomeScreen onSelectTopic={handleSelectTopic} />
