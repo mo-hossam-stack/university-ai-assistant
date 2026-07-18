@@ -49,21 +49,21 @@
   --radius-xl: 1.25rem;    /* 20px */
   --radius-2xl: 1.75rem;   /* 28px */
   
-  --background: #faf8f5;
+  --background: #faf5eb;
   --foreground: #0f172a;
-  --card: rgba(255, 255, 255, 0.85);
+  --card: rgba(255, 255, 255, 0.90);
   --card-foreground: #0f172a;
   --primary: #16a34a;
   --primary-foreground: #ffffff;
-  --secondary: rgba(245, 241, 233, 0.95);
+  --secondary: #f3ebd4;
   --secondary-foreground: #334155;
-  --muted: rgba(242, 237, 227, 0.60);
+  --muted: rgba(240, 230, 210, 0.60);
   --muted-foreground: #64748b;
-  --accent: rgba(243, 238, 228, 0.80);
+  --accent: #efe5cb;
   --accent-foreground: #0f172a;
   --destructive: #dc2626;
-  --border: rgba(139, 92, 26, 0.08);
-  --input: rgba(255, 255, 255, 0.90);
+  --border: rgba(139, 92, 26, 0.12);
+  --input: rgba(255, 255, 255, 0.92);
   --ring: #16a34a;
 
   --bg-mesh-a: rgba(22, 163, 74, 0.03);

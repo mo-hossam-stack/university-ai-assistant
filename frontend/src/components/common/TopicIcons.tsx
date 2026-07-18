@@ -4,197 +4,225 @@ interface IconProps {
   className?: string
 }
 
-// 1. Course Registration: Abstract Gateway / Shield with nested intelligence core
+// 1. Course Registration: Stylized Graduation Cap with checkmark/registry detail
 export const CourseRegIcon = ({ className }: IconProps) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     className={cn("w-full h-full", className)}
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
   >
-    {/* Outer geometric shield/portal */}
+    {/* Cap top diamond */}
     <path
-      d="M5 3v9c0 4.418 3.582 8 8 8s8-3.582 8-8V3L13 6.5 5 3z"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {/* Nested floating core */}
-    <path
-      d="M13 9.5l1.5 1.5-1.5 1.5-1.5-1.5L13 9.5z"
+      d="M12 3L22 8.5L12 14L2 8.5L12 3Z"
       fill="currentColor"
-      className="animate-pulse"
+      fillOpacity="0.12"
     />
-    <circle cx="13" cy="14" r="2" stroke="currentColor" strokeWidth="1.5" />
+    {/* Cap bottom support */}
+    <path d="M6 12v3.5C6 17 8.5 18.5 12 18.5s6-1.5 6-3.5V12" />
+    {/* Tassel line */}
+    <path d="M18 10v4" />
+    {/* Registry checkmark overlay */}
+    <path
+      d="M9.5 13.5l1.5 1.5 3.5-3.5"
+      stroke="var(--primary)"
+      strokeWidth="2"
+    />
   </svg>
 )
 
-// 2. Results & GPA: Dynamic progress curves / rising prism towers
+// 2. Results & GPA: Open academic book where pages emerge as a rising bar chart
 export const ResultsGpaIcon = ({ className }: IconProps) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     className={cn("w-full h-full", className)}
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
   >
-    {/* Non-traditional rising towers with dynamic angles */}
+    {/* Open book background */}
     <path
-      d="M4 20h16"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <path
-      d="M7 20v-5M12 20V9M17 20V4"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    {/* Loop wrapping the peak growth */}
-    <path
-      d="M17 4c-1 0-2 2-3 4.5S11 15 9.5 15"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeDasharray="2 2"
-    />
-    {/* Peak diamond node */}
-    <rect
-      x="15.5"
-      y="2.5"
-      width="3"
-      height="3"
-      rx="0.5"
-      transform="rotate(45 17 4)"
+      d="M2 19.5A2.5 2.5 0 014.5 17H12M22 19.5A2.5 2.5 0 0019.5 17H12"
       fill="currentColor"
+      fillOpacity="0.08"
+    />
+    <path d="M12 6v11" />
+    {/* Rising bars (GPA growth) emerging from the pages */}
+    <path
+      d="M6 14v-4"
+      strokeWidth="2"
+    />
+    <path
+      d="M9 14v-7"
+      stroke="var(--primary)"
+      strokeWidth="2"
+    />
+    <path
+      d="M15 14v-9"
+      strokeWidth="2"
+    />
+    <path
+      d="M18 14v-11"
+      stroke="var(--primary)"
+      strokeWidth="2"
     />
   </svg>
 )
 
-// 3. Academic Calendar: Cyclical orbital dial instead of a calendar grid
+// 3. Academic Calendar: Calendar sheet with circular clock orbital overlay
 export const CalendarIcon = ({ className }: IconProps) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     className={cn("w-full h-full", className)}
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
   >
-    {/* Concentric orbital paths */}
+    {/* Calendar card */}
+    <rect
+      x="3"
+      y="4"
+      width="18"
+      height="16"
+      rx="2.5"
+      fill="currentColor"
+      fillOpacity="0.1"
+    />
+    <path d="M16 2v4M8 2v4M3 9h18" />
+    {/* Time indicator overlay at bottom right */}
     <circle
-      cx="12"
-      cy="12"
-      r="8"
+      cx="14"
+      cy="14"
+      r="4.5"
+      fill="var(--background)"
       stroke="currentColor"
-      strokeWidth="1.8"
-      strokeDasharray="14 6"
-      className="animate-[spin_10s_linear_infinite]"
-      style={{ transformOrigin: "12px 12px" }}
+      strokeWidth="1.5"
     />
-    <circle
-      cx="12"
-      cy="12"
-      r="4"
-      stroke="currentColor"
-      strokeWidth="1.2"
-    />
-    {/* Center node */}
-    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-    {/* Tilted alignment ray representing dates */}
-    <line
-      x1="12"
-      y1="4"
-      x2="12"
-      y2="2"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    />
-    <line
-      x1="12"
-      y1="22"
-      x2="12"
-      y2="20"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
+    <path
+      d="M14 12v2l1.5 1"
+      stroke="var(--primary)"
+      strokeWidth="1.5"
     />
   </svg>
 )
 
-// 4. Fees & Payments: Interlocking Möbius infinity curves (flow)
+// 4. Fees & Payments: Credit card base with currency dynamic transaction flows
 export const FeesPaymentsIcon = ({ className }: IconProps) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     className={cn("w-full h-full", className)}
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
   >
-    {/* Möbius loop representing flow */}
+    {/* Credit card */}
+    <rect
+      x="3"
+      y="5"
+      width="18"
+      height="13"
+      rx="2"
+      fill="currentColor"
+      fillOpacity="0.1"
+    />
+    <path d="M3 9.5h18M7 13.5h2" />
+    {/* Transaction flow path (curved arrow) */}
     <path
-      d="M7 15a3 3 0 100-6 3 3 0 000 6zM17 15a3 3 0 100-6 3 3 0 000 6z"
-      stroke="currentColor"
-      strokeWidth="1.8"
+      d="M20.5 12a5.5 5.5 0 01-5.5 5.5"
+      stroke="var(--primary)"
+      strokeWidth="1.5"
+      strokeDasharray="3 2"
     />
     <path
-      d="M7 12c2.5 0 7.5 6 10 6M17 12c-2.5 0-7.5-6-10-6"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
+      d="M3.5 12a5.5 5.5 0 015.5-5.5"
+      stroke="var(--primary)"
+      strokeWidth="1.5"
+      strokeDasharray="3 2"
     />
-    <circle cx="12" cy="12" r="2.5" fill="currentColor" fillOpacity="0.25" />
+    <path d="M13 13.5h3" />
   </svg>
 )
 
-// 5. Exams & Timetable: Intersecting timeline beams
+// 5. Exams & Timetable: Exam document outline with integrated clock badge
 export const ExamsTimetableIcon = ({ className }: IconProps) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     className={cn("w-full h-full", className)}
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
   >
-    {/* Hexagonal structural frame */}
+    {/* Exam Sheet with folded corner */}
     <path
-      d="M12 2l8.66 5v10L12 22l-8.66-5V7L12 2z"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+      fill="currentColor"
+      fillOpacity="0.08"
     />
-    {/* Core time-slice coordinates */}
-    <path
-      d="M12 2v10M12 12l8.66-5M12 12l-8.66-5"
+    <path d="M14 2v6h6M8 13h4M8 17h7" />
+    {/* Clock/time badge for exam schedule */}
+    <circle
+      cx="16"
+      cy="14"
+      r="3.5"
+      fill="var(--background)"
       stroke="currentColor"
       strokeWidth="1.5"
-      strokeLinecap="round"
     />
-    <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity="0.2" />
+    <path
+      d="M16 12.2v1.8h1.2"
+      stroke="var(--primary)"
+      strokeWidth="1.2"
+    />
   </svg>
 )
 
-// 6. Portal Help: Concentric network nodes / Portal keyhole
+// 6. Portal Help: Key shape whose head is a chat/support bubble
 export const PortalHelpIcon = ({ className }: IconProps) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     className={cn("w-full h-full", className)}
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
   >
-    {/* Outer radar wave rings */}
+    {/* Key shaft & teeth */}
+    <path d="M13.5 10.5L20 4v3h2v2h-2v2l-1.5 1.5-5-2z" />
+    {/* Chat bubble head of the key */}
     <path
-      d="M18.36 5.64a9 9 0 010 12.72M5.64 5.64a9 9 0 000 12.72"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
+      d="M10.5 7.5c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4z"
+      fill="currentColor"
+      fillOpacity="0.12"
     />
-    {/* Nested core link */}
-    <circle cx="12" cy="12" r="3.5" stroke="currentColor" strokeWidth="1.8" />
+    {/* Support question mark inside the chat bubble */}
     <path
-      d="M12 15.5v3M10.5 18.5h3"
-      stroke="currentColor"
+      d="M9.5 10.5c0-.6.4-1 1-1s1 .4 1 1c0 .5-.4.7-.7 1"
+      stroke="var(--primary)"
       strokeWidth="1.5"
-      strokeLinecap="round"
+    />
+    <circle
+      cx="10.5"
+      cy="13.2"
+      r="0.5"
+      fill="var(--primary)"
     />
   </svg>
 )
