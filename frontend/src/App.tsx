@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from "react"
-import ChatBot from "./components/chat/ChatBot"
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react"
 import { Header } from "./components/layout/Header"
+
+const ChatBot = lazy(() => import("./components/chat/ChatBot"))
 
 /**
  * SkipToContent — the very first focusable element on the page.
@@ -97,7 +98,20 @@ const App = () => {
           tabIndex={-1}
           aria-label="Chat interface"
         >
-          <ChatBot goHomeRef={goHomeRef} />
+          <Suspense
+            fallback={
+              <div className="flex h-full items-center justify-center bg-background/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <p className="text-sm text-muted-foreground font-medium animate-pulse">
+                    Loading assistant...
+                  </p>
+                </div>
+              </div>
+            }
+          >
+            <ChatBot goHomeRef={goHomeRef} />
+          </Suspense>
         </main>
       </div>
     </div>
