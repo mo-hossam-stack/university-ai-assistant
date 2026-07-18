@@ -1,15 +1,15 @@
 import { memo, useEffect, useRef } from "react"
 import { cn } from "@/lib/utils"
+import { Logo } from "../common/Logo"
+import { ArrowRight, Sparkles } from "lucide-react"
 import {
-  GraduationCap,
-  Calendar,
-  DollarSign,
-  BookOpen,
-  FileText,
-  HelpCircle,
-  ArrowRight,
-  Sparkles,
-} from "lucide-react"
+  CourseRegIcon,
+  ResultsGpaIcon,
+  CalendarIcon,
+  FeesPaymentsIcon,
+  ExamsTimetableIcon,
+  PortalHelpIcon,
+} from "../common/TopicIcons"
 
 interface WelcomeScreenProps {
   onSelectTopic: (topic: string) => void
@@ -34,42 +34,42 @@ interface TopicCell {
 
 const quickTopics: TopicCell[] = [
   {
-    icon: GraduationCap,
+    icon: CourseRegIcon,
     label: "Course Registration",
     query: "How do I register for courses?",
     description: "Enroll in subjects, manage your academic load, and update selections.",
     size: "featured",
   },
   {
-    icon: BookOpen,
+    icon: ResultsGpaIcon,
     label: "Results & GPA",
     query: "How do I check my semester results?",
     description: "View grades, track your GPA, and download transcripts.",
     size: "wide",
   },
   {
-    icon: Calendar,
+    icon: CalendarIcon,
     label: "Academic Calendar",
     query: "What are the important academic dates?",
     description: "Deadlines, holidays, and exam periods.",
     size: "normal",
   },
   {
-    icon: DollarSign,
+    icon: FeesPaymentsIcon,
     label: "Fees & Payments",
     query: "How do I pay my school fees?",
     description: "Tuition deadlines, payment methods, and receipts.",
     size: "normal",
   },
   {
-    icon: FileText,
+    icon: ExamsTimetableIcon,
     label: "Exams & Timetable",
     query: "When are my exams scheduled?",
     description: "Hall assignments, schedules, and rules.",
     size: "normal",
   },
   {
-    icon: HelpCircle,
+    icon: PortalHelpIcon,
     label: "Portal Help",
     query: "I can't login to my student portal",
     description: "Password reset, account issues, and navigation.",
@@ -129,18 +129,9 @@ const WelcomeScreen = memo(function WelcomeScreen({
       <div className="w-full max-w-2xl flex flex-col min-h-0 py-4 sm:py-6">
 
         {/* ── Hero heading ───────────────────────────────────────── */}
-        <div className="text-center mb-6 sm:mb-8 flex-shrink-0">
-          <div
-            className={cn(
-              "inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl mb-4",
-              "bg-primary shadow-xl shadow-primary/30",
-              "animate-float"
-            )}
-          >
-            <GraduationCap
-              className="w-7 h-7 sm:w-8 sm:h-8 text-primary-foreground"
-              aria-hidden="true"
-            />
+        <div className="text-center mb-6 sm:mb-8 flex-shrink-0 flex flex-col items-center">
+          <div className="mb-4">
+            <Logo size="lg" />
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight font-display">

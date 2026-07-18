@@ -1,6 +1,7 @@
 import { memo, useState } from "react"
-import { Moon, Sun, Bot } from "lucide-react"
+import { Moon, Sun } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Logo } from "../common/Logo"
 
 interface HeaderProps {
   isDark: boolean
@@ -34,9 +35,8 @@ const Header = memo(function Header({ isDark, onToggleTheme, onLogoClick }: Head
             type="button"
             onClick={onLogoClick}
             className={cn(
-              "relative w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0",
-              "bg-primary shadow-md shadow-primary/25",
-              "hover:scale-105 hover:shadow-primary/40",
+              "relative w-9 h-9 flex items-center justify-center flex-shrink-0",
+              "hover:scale-105",
               "active:scale-95",
               "transition-all duration-200 ease-out",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
@@ -45,7 +45,7 @@ const Header = memo(function Header({ isDark, onToggleTheme, onLogoClick }: Head
             )}
             aria-label="UniHelp AI — return to home"
           >
-            <Bot className="w-5 h-5 text-primary-foreground" aria-hidden="true" />
+            <Logo size="sm" />
           </button>
 
           {/* Brand text — visually decorative, the aria-label on the button above conveys the meaning */}
