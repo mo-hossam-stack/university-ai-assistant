@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react"
 import { Header } from "./components/layout/Header"
+import { Background3D } from "./components/layout/Background3D"
 
 const ChatBot = lazy(() => import("./components/chat/ChatBot"))
 
@@ -56,34 +57,9 @@ const App = () => {
   }, [])
 
   return (
-    <div className="flex flex-col h-[100dvh] overflow-hidden relative bg-background">
-      {/* Ambient mesh background — fixed, non-scrollable */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
-      >
-        {/* Top-left emerald blob */}
-        <div
-          className="absolute -top-32 -left-32 w-[480px] h-[480px] rounded-full opacity-60 animate-mesh-blob-1"
-          style={{
-            background: "radial-gradient(circle, var(--bg-mesh-a) 0%, transparent 70%)",
-          }}
-        />
-        {/* Bottom-right violet blob */}
-        <div
-          className="absolute -bottom-40 -right-40 w-[560px] h-[560px] rounded-full opacity-50 animate-mesh-blob-2"
-          style={{
-            background: "radial-gradient(circle, var(--bg-mesh-b) 0%, transparent 70%)",
-          }}
-        />
-        {/* Center accent blob */}
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full opacity-30 animate-mesh-blob-3"
-          style={{
-            background: "radial-gradient(circle, var(--bg-mesh-a) 0%, transparent 60%)",
-          }}
-        />
-      </div>
+    <div className="flex flex-col h-[100dvh] overflow-hidden relative bg-transparent">
+      {/* 3D Volumetric Floating Background */}
+      <Background3D />
 
       {/* App Shell */}
       <div className="relative z-10 flex flex-col h-full">

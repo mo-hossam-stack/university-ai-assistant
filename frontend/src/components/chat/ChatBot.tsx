@@ -138,7 +138,7 @@ const ChatBot = ({ goHomeRef }: ChatBotProps) => {
   )
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-transparent">
       {hasMessages && !showWelcome && (
         <div
           className="flex items-center justify-between px-4 py-2 border-b bg-card flex-shrink-0"
@@ -210,7 +210,7 @@ const ChatBot = ({ goHomeRef }: ChatBotProps) => {
         </div>
       </div>
 
-      <div className="flex-shrink-0 border-t bg-card px-4 py-3 safe-area-bottom">
+      <div className="flex-shrink-0 border-t bg-card/45 backdrop-blur-md px-4 py-3 safe-area-bottom">
         <div className="max-w-2xl mx-auto">
           <ChatInput
             value={prompt}

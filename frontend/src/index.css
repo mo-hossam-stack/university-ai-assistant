@@ -264,6 +264,18 @@
   }
 }
 
+@keyframes drift {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+  50% {
+    transform: translate(40px, -30px) rotate(4deg) scale(1.02);
+  }
+  100% {
+    transform: translate(-30px, 20px) rotate(-4deg) scale(0.98);
+  }
+}
+
 .typing-dot {
   animation: typingDot 1.4s infinite ease-in-out;
 }
