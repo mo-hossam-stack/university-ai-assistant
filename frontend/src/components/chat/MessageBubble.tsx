@@ -1,7 +1,24 @@
 import { memo, useMemo } from "react"
 import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize"
 import { cn } from "@/lib/utils"
 import { Bot, User } from "lucide-react"
+
+const sanitizeSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    a: [["href", /^https?:\/\//]],
+  },
+}
+
+function sanitizeResponse(text: string): string {
+  return text
+    .replace(/javascript\s*:/gi, "")
+    .replace(/data\s*:/gi, "")
+    .replace(/vbscript\s*:/gi, "")
+}
 
 interface MessageBubbleProps {
   content: string
@@ -61,6 +78,8 @@ const MessageBubble = memo(function MessageBubble({
         >
           <div className="prose prose-sm max-w-none dark:prose-invert">
             <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[[rehypeSanitize, sanitizeSchema]]}
               components={{
                 p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
                 ul: ({ children }) => <ul className="list-disc list-inside my-1 space-y-0.5">{children}</ul>,
@@ -72,7 +91,7 @@ const MessageBubble = memo(function MessageBubble({
                 ),
               }}
             >
-              {content}
+              {sanitizeResponse(content)}
             </ReactMarkdown>
           </div>
         </div>

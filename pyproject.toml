@@ -14,4 +14,6 @@ dependencies = [
     "psycopg>=3.2",
     "python-dotenv>=1.2.2",
     "whitenoise>=6.7.0",
+    "django-csp>=3.8",
+    "sentry-sdk>=2.0.0",
 ]

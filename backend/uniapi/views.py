@@ -1,6 +1,6 @@
 import json
 import logging
-from groq import Groq
+from groq import Groq, RateLimitError, APIConnectionError, APIStatusError
 from pathlib import Path
 from django.conf import settings
 from rest_framework.decorators import api_view
@@ -8,8 +8,17 @@ from rest_framework.response import Response
 
 logger = logging.getLogger(__name__)
 
-GROQ_API_KEY = settings.GROQ_API_KEY
-client = Groq(api_key=GROQ_API_KEY)
+_groq_client = None
+
+
+def get_groq_client() -> Groq:
+    global _groq_client
+    if _groq_client is None:
+        key = getattr(settings, "GROQ_API_KEY", None)
+        if not key:
+            raise RuntimeError("GROQ_API_KEY is not configured in settings.")
+        _groq_client = Groq(api_key=key)
+    return _groq_client
 
 OUT_OF_SCOPE = "OUT_OF_SCOPE"
 CLASSIFIER_TIMEOUT = 5
@@ -67,7 +76,7 @@ def classify_intent(user_message: str) -> str:
     classifier_prompt = load_classifier_prompt()
 
     try:
-        response = client.chat.completions.create(
+        response = get_groq_client().chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": classifier_prompt},
@@ -149,12 +158,26 @@ def build_system_prompt(intent: str) -> str:
 @api_view(["POST"])
 def chat_with_unihelp(request):
     try:
-        user_message = request.data.get("message", "")
+        user_message = request.data.get("message")
+        if user_message is None:
+            return Response({"error": "Message parameter is required."}, status=400)
+        if not isinstance(user_message, str):
+            return Response({"error": "Message must be a string."}, status=400)
+        
+        user_message = user_message.strip()
+        if not user_message:
+            return Response({"error": "Message cannot be empty."}, status=400)
+            
+        if len(user_message) > 1000:
+            return Response(
+                {"error": "Message exceeds the maximum allowed length of 1000 characters."},
+                status=400,
+            )
 
         intent = classify_intent(user_message)
         system_prompt = build_system_prompt(intent)
 
-        response = client.chat.completions.create(
+        response = get_groq_client().chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -168,8 +191,27 @@ def chat_with_unihelp(request):
 
         return Response({"response": answer})
 
-    except Exception as e:
+    except RateLimitError as e:
+        logger.warning("Groq Rate Limit Exceeded: %s", e)
         return Response(
-            {"error": f"Something went wrong: {str(e)}"},
+            {"error": "The AI service is currently busy. Please try again in a moment."},
+            status=503,
+        )
+    except APIConnectionError as e:
+        logger.error("Groq API Connection Error: %s", e, exc_info=True)
+        return Response(
+            {"error": "Could not connect to the AI service. Please try again later."},
+            status=503,
+        )
+    except APIStatusError as e:
+        logger.error("Groq API Status Error: %s", e, exc_info=True)
+        return Response(
+            {"error": "AI service returned an error status. Please try again."},
+            status=e.status_code if e.status_code in [400, 401, 403, 404, 500, 502, 503, 504] else 500,
+        )
+    except Exception as e:
+        logger.error("Unexpected error in chat_with_unihelp: %s", e, exc_info=True)
+        return Response(
+            {"error": "An unexpected server error occurred. Please try again later."},
             status=500,
         )
