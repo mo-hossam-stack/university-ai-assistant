@@ -11,7 +11,7 @@ dependencies = [
     "dj-database-url>=2.0.0",
     "groq>=1.1.2",
     "gunicorn>=23.0.0",
-    "openai>=2.26.0",
     "psycopg>=3.2",
     "python-dotenv>=1.2.2",
+    "whitenoise>=6.7.0",
 ]
