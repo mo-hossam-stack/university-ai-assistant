@@ -1,5 +1,19 @@
 # UniHelp AI -- Intelligent Conversational Assistant for Higher Education
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Django-6.0-092E20?style=for-the-badge&logo=django&logoColor=white" alt="Django 6.0" />
+  <img src="https://img.shields.io/badge/DRF-3.16-8A2BE2?style=for-the-badge&logo=django&logoColor=white" alt="Django REST Framework 3.16" />
+  <img src="https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.12+" />
+  <img src="https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 18.3" />
+  <img src="https://img.shields.io/badge/TypeScript-5.5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 5.5" />
+  <img src="https://img.shields.io/badge/Vite-5.4-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 5.4" />
+  <img src="https://img.shields.io/badge/TailwindCSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="TailwindCSS v4" />
+  <img src="https://img.shields.io/badge/shadcn/ui-UI-000000?style=for-the-badge&logo=shadcnui&logoColor=white" alt="shadcn/ui" />
+  <img src="https://img.shields.io/badge/PostgreSQL-14+-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Groq-Llama%203.3-F55036?style=for-the-badge&logo=groq&logoColor=white" alt="Groq Llama 3.3" />
+  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+</p>
+
 A bilingual (Arabic/English) AI-powered assistant that delivers instant, hallucination-free answers to university students -- replacing scattered PDFs, physical notices, and repetitive administrative queries with a single conversational interface.
 
 ---
