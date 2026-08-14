@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import logging
 
 import groq
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 from .services.chat import ChatService
@@ -15,7 +18,7 @@ def _error_response(message: str, code: str, status_code: int) -> Response:
 
 
 @api_view(["POST"])
-def chat_with_unihelp(request):
+def chat_with_unihelp(request: Request) -> Response:
     """Thin HTTP layer — validates input, delegates to ChatService, maps errors."""
     user_message = request.data.get("message")
 
