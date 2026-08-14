@@ -53,8 +53,8 @@ def load_knowledge_for_intent(intent: str) -> str:
             f"========================\n"
             f"{formatted}"
         )
-    except Exception as e:
-        logger.warning("Failed to load knowledge file %s: %s", filename, e)
+    except (json.JSONDecodeError, FileNotFoundError) as e:
+        logger.warning("Knowledge file %s unavailable: %s", filename, e)
         return ""
 
     _per_intent_cache[filename] = result
