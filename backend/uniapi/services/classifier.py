@@ -51,32 +51,22 @@ def classify_intent(user_message: str) -> str:
     """Classify a user message into an intent category via a fast LLM call."""
     classifier_prompt = load_classifier_prompt()
 
-    try:
-        client = get_groq_client()
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": classifier_prompt},
-                {"role": "user", "content": user_message},
-            ],
-            temperature=0.0,
-            max_tokens=20,
-            timeout=CLASSIFIER_TIMEOUT,
-        )
-        intent = response.choices[0].message.content.strip().lower()
+    client = get_groq_client()
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "system", "content": classifier_prompt},
+            {"role": "user", "content": user_message},
+        ],
+        temperature=0.0,
+        max_tokens=20,
+        timeout=CLASSIFIER_TIMEOUT,
+    )
+    intent = response.choices[0].message.content.strip().lower()
 
-        if intent in INTENT_DATA_MAP:
-            logger.info(
-                "Classified intent: %s for message: %s", intent, user_message[:50]
-            )
-            return intent
+    if intent in INTENT_DATA_MAP:
+        logger.info("Classified intent: %s", intent)
+        return intent
 
-        logger.info(
-            "Classified intent: %s (mapped to OUT_OF_SCOPE) for message: %s",
-            intent,
-            user_message[:50],
-        )
-        return OUT_OF_SCOPE
-    except Exception as e:
-        logger.warning("Classifier failed, defaulting to OUT_OF_SCOPE: %s", e)
-        return OUT_OF_SCOPE
+    logger.info("Classified intent: %s (mapped to OUT_OF_SCOPE)", intent)
+    return OUT_OF_SCOPE
