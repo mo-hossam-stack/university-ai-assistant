@@ -62,7 +62,12 @@ def classify_intent(user_message: str) -> str:
         max_tokens=20,
         timeout=CLASSIFIER_TIMEOUT,
     )
-    intent = response.choices[0].message.content.strip().lower()
+    content = response.choices[0].message.content
+    if not content:
+        logger.info("Classified intent: %s (empty classifier response)", OUT_OF_SCOPE)
+        return OUT_OF_SCOPE
+
+    intent = content.strip().lower()
 
     if intent in INTENT_DATA_MAP:
         logger.info("Classified intent: %s", intent)

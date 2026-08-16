@@ -30,4 +30,6 @@ class ChatService:
         )
 
         answer = response.choices[0].message.content
+        if not answer:
+            raise ValueError("The LLM returned an empty response")
         return {"response": answer}
