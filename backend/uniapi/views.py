@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from .serializers import ChatRequestSerializer
 from .services.chat import ChatService
 
 logger = logging.getLogger(__name__)
@@ -20,15 +21,11 @@ def _error_response(message: str, code: str, status_code: int) -> Response:
 @api_view(["POST"])
 def chat_with_unihelp(request: Request) -> Response:
     """Thin HTTP layer — validates input, delegates to ChatService, maps errors."""
-    user_message = request.data.get("message")
+    serializer = ChatRequestSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    if not isinstance(user_message, str) or not user_message.strip():
-        return _error_response(
-            "Message must be a non-empty string.",
-            "EMPTY_MESSAGE",
-            status.HTTP_400_BAD_REQUEST,
-        )
-    user_message = user_message.strip()
+    user_message = serializer.validated_data["message"]
 
     service = ChatService()
     try:
