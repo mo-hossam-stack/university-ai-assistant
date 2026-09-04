@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
+import groq
+
 from .llm import get_groq_client
 
 logger = logging.getLogger(__name__)
@@ -51,17 +53,22 @@ def classify_intent(user_message: str) -> str:
     """Classify a user message into an intent category via a fast LLM call."""
     classifier_prompt = load_classifier_prompt()
 
-    client = get_groq_client()
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "system", "content": classifier_prompt},
-            {"role": "user", "content": user_message},
-        ],
-        temperature=0.0,
-        max_tokens=20,
-        timeout=CLASSIFIER_TIMEOUT,
-    )
+    try:
+        client = get_groq_client()
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": classifier_prompt},
+                {"role": "user", "content": user_message},
+            ],
+            temperature=0.0,
+            max_tokens=20,
+            timeout=CLASSIFIER_TIMEOUT,
+        )
+    except groq.GroqError:
+        logger.warning("Classifier Groq call failed, falling back to OUT_OF_SCOPE")
+        return OUT_OF_SCOPE
+
     content = response.choices[0].message.content
     if not content:
         logger.info("Classified intent: %s (empty classifier response)", OUT_OF_SCOPE)
