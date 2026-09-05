@@ -44,7 +44,8 @@ class Message(models.Model):
         choices=Role.choices,
     )
     content = models.TextField()
-    tokens_used = models.PositiveIntegerField(default=0)
+    prompt_tokens = models.PositiveIntegerField(default=0)
+    completion_tokens = models.PositiveIntegerField(default=0)
     intent = models.CharField(
         max_length=50,
         blank=True,
@@ -53,7 +54,13 @@ class Message(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["created_at"]
+        ordering = ["created_at", "id"]
+        indexes = [
+            models.Index(
+                fields=["conversation", "created_at"],
+                name="msg_conv_time_idx",
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.role}: {self.content[:50]}"
