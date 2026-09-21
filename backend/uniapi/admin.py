@@ -6,7 +6,7 @@ from .models import Conversation, Message
 class MessageInline(admin.TabularInline):
     model = Message
     extra = 0
-    readonly_fields = ("role", "content", "tokens_used", "intent", "created_at")
+    readonly_fields = ("role", "content", "prompt_tokens", "completion_tokens", "intent", "created_at")
 
 
 @admin.register(Conversation)
