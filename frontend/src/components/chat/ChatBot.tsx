@@ -34,7 +34,9 @@ const ChatBot = ({ goHomeRef }: ChatBotProps) => {
   const [isBotTyping, setIsBotTyping] = useState(false)
   const [toast, setToast] = useState<ToastState | null>(null)
   const [showWelcome, setShowWelcome] = useState(true)
+  const [conversationId, setConversationId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const generationRef = useRef(0)
 
   useEffect(() => {
     if (goHomeRef) {
@@ -63,9 +65,11 @@ const ChatBot = ({ goHomeRef }: ChatBotProps) => {
   }, [])
 
   const handleGoHome = useCallback(() => {
+    generationRef.current += 1
     setShowWelcome(true)
     setMessages([])
     setPrompt("")
+    setConversationId(null)
   }, [])
 
   const handleBack = useCallback(() => {
@@ -101,9 +105,18 @@ const ChatBot = ({ goHomeRef }: ChatBotProps) => {
       setPrompt("")
       setIsBotTyping(true)
       scrollToBottom("instant")
+      const generation = generationRef.current
+      const currentConversationId = conversationId
 
       try {
-        const response = await promptOpenai({ message: messageText })
+        const response = await promptOpenai({
+          message: messageText,
+          conversation_id: currentConversationId,
+        })
+
+        if (generationRef.current !== generation) return
+
+        setConversationId(response.conversation_id)
 
         const botMessage: Message = {
           id: `bot-${Date.now()}`,
@@ -114,6 +127,7 @@ const ChatBot = ({ goHomeRef }: ChatBotProps) => {
 
         setMessages((prev) => [...prev, botMessage])
       } catch (err) {
+        if (generationRef.current !== generation) return
         const errorMessage = err instanceof Error ? err.message : "Something went wrong"
         showToast(errorMessage, "error")
       } finally {
@@ -121,7 +135,7 @@ const ChatBot = ({ goHomeRef }: ChatBotProps) => {
         scrollToBottom()
       }
     },
-    [isBotTyping, showToast, scrollToBottom]
+    [isBotTyping, showToast, scrollToBottom, conversationId]
   )
 
   const handleSubmit = useCallback(() => {
