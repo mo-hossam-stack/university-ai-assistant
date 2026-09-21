@@ -19,7 +19,7 @@ class ChatResponseSerializer(serializers.Serializer):
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ("id", "role", "content", "tokens_used", "intent", "created_at")
+        fields = ("id", "role", "content", "prompt_tokens", "completion_tokens", "intent", "created_at")
 
 
 class ConversationSerializer(serializers.ModelSerializer):

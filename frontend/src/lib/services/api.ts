@@ -5,10 +5,12 @@ const API_BASE_URL = import.meta.env.VITE_API_URL
 
 interface ChatRequest {
   message: string
+  conversation_id?: string | null
 }
 
 interface ChatResponse {
   response: string
+  conversation_id: string
 }
 
 interface ApiError {
@@ -89,7 +91,7 @@ export async function promptOpenai(data: ChatRequest): Promise<ChatResponse> {
 
   const response = await apiClient.post<ChatResponse>(
     "/api/chat_with_unihelp/",
-    { message: sanitizedMessage },
+    { message: sanitizedMessage, conversation_id: data.conversation_id },
     config
   )
 

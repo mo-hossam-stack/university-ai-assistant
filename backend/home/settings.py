@@ -135,6 +135,15 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
+REST_FRAMEWORK = {
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": os.getenv("ANON_THROTTLE_RATE", "30/min"),
+    },
+}
+
 CORS_ALLOWED_ORIGINS = os.getenv(
     "CORS_ALLOWED_ORIGINS",
     "http://localhost:5173,http://localhost:5174,http://localhost:3000,http://localhost:8000",
