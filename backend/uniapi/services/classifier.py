@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 import groq
+from django.conf import settings
 
 from .llm import get_groq_client
 
@@ -53,10 +54,13 @@ def classify_intent(user_message: str) -> str:
     """Classify a user message into an intent category via a fast LLM call."""
     classifier_prompt = load_classifier_prompt()
 
+    if not settings.GROQ_CLASSIFIER_MODEL:
+        logger.warning("GROQ_MODEL not set — classifier falls back to OUT_OF_SCOPE")
+        return OUT_OF_SCOPE
     try:
         client = get_groq_client()
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=settings.GROQ_CLASSIFIER_MODEL,
             messages=[
                 {"role": "system", "content": classifier_prompt},
                 {"role": "user", "content": user_message},

@@ -4,6 +4,8 @@ import logging
 import time
 import uuid
 
+from django.conf import settings
+
 from groq.types.chat import ChatCompletionMessageParam
 
 from .classifier import classify_intent
@@ -53,9 +55,11 @@ class ChatService:
             len(history),
         )
 
+        if not settings.GROQ_MODEL:
+            raise ValueError("GROQ_MODEL is not configured — set it in backend/.env")
         start = time.monotonic()
         response = get_groq_client().chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=settings.GROQ_MODEL,
             messages=messages,
             temperature=0.4,
             max_tokens=600,
