@@ -66,6 +66,23 @@ def chat_with_unihelp(request: Request) -> Response:
             "LLM_RATE_LIMIT",
             status.HTTP_429_TOO_MANY_REQUESTS,
         )
+    except (groq.NotFoundError, groq.BadRequestError) as e:
+        msg = str(e)
+        is_decommissioned = "decommissioned" in msg.lower() or "model_not_found" in msg.lower()
+        body = getattr(e, "body", None)
+        detail = str(body)[:200] if body else msg[:200]
+        logger.error(
+            "request_id=%s Groq model error (model=%s): %s",
+            request_id,
+            detail,
+            e,
+        )
+        code = "LLM_MODEL_DECOMMISSIONED" if is_decommissioned else "LLM_MODEL_ERROR"
+        return _error_response(
+            "AI model is no longer available.",
+            code,
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
     except groq.APIError as e:
         logger.error("request_id=%s Groq API error: %s", request_id, e)
         return _error_response(
@@ -73,6 +90,16 @@ def chat_with_unihelp(request: Request) -> Response:
             "LLM_API_ERROR",
             status.HTTP_503_SERVICE_UNAVAILABLE,
         )
+    except groq.GroqError as e:
+        logger.error("request_id=%s Groq error: %s", request_id, e)
+        return _error_response(
+            "AI service is temporarily unavailable.",
+            "LLM_API_ERROR",
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+    except ValueError as e:
+        logger.error("request_id=%s config error: %s", request_id, e)
+        return _error_response(str(e), "LLM_CONFIG_ERROR", status.HTTP_503_SERVICE_UNAVAILABLE)
     except Exception:
         logger.exception("request_id=%s unexpected error in chat endpoint", request_id)
         return _error_response(
