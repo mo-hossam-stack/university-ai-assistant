@@ -20,6 +20,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+    entrypoint: ["/bin/sh", "-c", "python manage.py migrate --noinput && exec \"$0\" \"$@\""]
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
     volumes:
       - ./backend:/app/backend
