@@ -29,7 +29,7 @@ class ChatService:
         user_message: str,
         request_id: str = "",
         conversation_id: uuid.UUID | None = None,
-    ) -> dict[str, str]:
+    ) -> dict[str, str | int]:
         if conversation_id is None:
             conversation = None
             history: list[HistoryMessage] = []
@@ -99,4 +99,5 @@ class ChatService:
         return {
             "response": answer,
             "conversation_id": str(conversation.id),
+            "tokens_used": prompt_tokens + completion_tokens,
         }
