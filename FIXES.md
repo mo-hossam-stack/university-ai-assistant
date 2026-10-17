@@ -114,7 +114,7 @@ returns 200 with a grounded answer.
 
 ---
 
-### [ ] A4 — Missing `handleGoHome` dependency
+### [x] A4 — Missing `handleGoHome` dependency
 **File**: `frontend/src/components/chat/ChatBot.tsx:41-45`
 
 ```tsx
