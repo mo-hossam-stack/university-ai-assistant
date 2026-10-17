@@ -80,6 +80,7 @@ class ChatEndpointTests(APITestCase):
             resp = self.client.post(self.url, {"message": "hi"}, format="json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(resp.data["response"], "hello there")
+        self.assertEqual(resp.data["tokens_used"], 49)
         conv_id = uuid.UUID(resp.data["conversation_id"])
         self.assertTrue(Conversation.objects.filter(pk=conv_id).exists())
 
@@ -245,8 +246,10 @@ class ConversationServiceTests(TestCase):
 class RateLimitTests(APITestCase):
     def test_over_limit_returns_429(self):
         url = "/api/chat_with_unihelp/"
-        with patch.object(
-            SimpleRateThrottle, "THROTTLE_RATES", {"anon": "3/min"}
+        with (
+            patch.object(SimpleRateThrottle, "THROTTLE_RATES", {"anon": "3/min"}),
+            _patch_chat(_llm_response("hi")),
+            _patch_classifier(),
         ):
             cache.clear()
             for _ in range(3):
