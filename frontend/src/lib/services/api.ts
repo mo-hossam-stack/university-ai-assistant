@@ -11,6 +11,7 @@ interface ChatRequest {
 interface ChatResponse {
   response: string
   conversation_id: string
+  tokens_used: number
 }
 
 interface ApiError {
