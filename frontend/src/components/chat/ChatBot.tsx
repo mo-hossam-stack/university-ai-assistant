@@ -38,11 +38,19 @@ const ChatBot = ({ goHomeRef }: ChatBotProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const generationRef = useRef(0)
 
+  const handleGoHome = useCallback(() => {
+    generationRef.current += 1
+    setShowWelcome(true)
+    setMessages([])
+    setPrompt("")
+    setConversationId(null)
+  }, [])
+
   useEffect(() => {
     if (goHomeRef) {
       goHomeRef.current = handleGoHome
     }
-  }, [goHomeRef])
+  }, [goHomeRef, handleGoHome])
 
   const hasMessages = messages.length > 0
 
@@ -62,14 +70,6 @@ const ChatBot = ({ goHomeRef }: ChatBotProps) => {
 
   const hideToast = useCallback(() => {
     setToast(null)
-  }, [])
-
-  const handleGoHome = useCallback(() => {
-    generationRef.current += 1
-    setShowWelcome(true)
-    setMessages([])
-    setPrompt("")
-    setConversationId(null)
   }, [])
 
   const handleBack = useCallback(() => {
