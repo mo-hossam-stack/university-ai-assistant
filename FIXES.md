@@ -140,7 +140,7 @@ and the home button breaks. `phases.md:645` says fix all warnings.
 
 ---
 
-### [ ] A5 — The typecheck command in `phases.md` is a no-op
+### [x] A5 — The typecheck command in `phases.md` is a no-op
 **Files**: `phases.md:646,649` → `frontend/tsconfig.json:1-13`
 
 `npx tsc --noEmit` points at a solution-style config (`"files": []` +
