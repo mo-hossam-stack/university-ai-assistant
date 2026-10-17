@@ -83,7 +83,7 @@ leave the message serializer alone.
 
 ---
 
-### [ ] A3 — `.env.example` is missing `GROQ_MODEL`, so it produces a broken app
+### [x] A3 — `.env.example` is missing `GROQ_MODEL`, so it produces a broken app
 **File**: `backend/.env.example`
 
 | Var | Read at | In example? |
