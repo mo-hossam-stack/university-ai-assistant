@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from django.conf import settings
 from django.core import checks
+from django.core.exceptions import ImproperlyConfigured
 
 REQUIRED_VARS = {
     "SECRET_KEY": (
@@ -24,7 +25,11 @@ def check_required_env_vars(app_configs=None, **kwargs):
     """Fail with a readable message when required configuration is missing."""
     errors = []
     for name, (error_id, hint) in REQUIRED_VARS.items():
-        if not getattr(settings, name, ""):
+        try:
+            value = getattr(settings, name)
+        except ImproperlyConfigured:
+            value = ""
+        if not value:
             errors.append(
                 checks.Error(
                     f"{name} is not set.",
