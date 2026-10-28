@@ -14,7 +14,7 @@ from rest_framework.test import APITestCase
 
 from .checks import check_required_env_vars
 from .models import Conversation, Message
-from .services.conversation import load_history, save_messages
+from .services.conversation import ConversationFull, load_history, save_messages
 
 HIGH_RATE = patch.object(
     SimpleRateThrottle, "THROTTLE_RATES", {"anon": "100000/min"}
@@ -152,6 +152,15 @@ class ChatEndpointTests(APITestCase):
         self.assertEqual(resp.data["code"], "CONVERSATION_NOT_FOUND")
         self.assertFalse(Conversation.objects.filter(pk=missing).exists())
 
+    def test_full_conversation_returns_400(self):
+        with patch(
+            "uniapi.views.ChatService.chat",
+            side_effect=ConversationFull("full"),
+        ):
+            resp = self.client.post(self.url, {"message": "hi"}, format="json")
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.data["code"], "CONVERSATION_FULL")
+
     def test_empty_message_returns_400(self):
         resp = self.client.post(self.url, {"message": ""}, format="json")
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
@@ -232,6 +241,54 @@ class ConversationServiceTests(TestCase):
         self.assertEqual(len(history), 1)
         self.assertEqual(history[0]["role"], "user")
         self.assertEqual(history[0]["content"], "small question")
+
+    def test_save_messages_rejects_full_conversation(self):
+        conversation = Conversation.objects.create()
+        Message.objects.bulk_create(
+            [
+                Message(
+                    conversation=conversation,
+                    role=Message.Role.USER,
+                    content=f"message-{i}",
+                )
+                for i in range(499)
+            ]
+        )
+        with self.assertRaises(ConversationFull):
+            save_messages(
+                conversation,
+                "one more",
+                "answer",
+                prompt_tokens=5,
+                completion_tokens=3,
+                intent="portal_help",
+            )
+
+    def test_save_messages_titles_new_conversation(self):
+        conversation = Conversation.objects.create()
+        save_messages(
+            conversation,
+            "How do I register?",
+            "answer",
+            prompt_tokens=5,
+            completion_tokens=3,
+            intent="course_registration",
+        )
+        conversation.refresh_from_db()
+        self.assertEqual(conversation.title, "How do I register?")
+
+    def test_save_messages_keeps_existing_title(self):
+        conversation = Conversation.objects.create(title="Existing title")
+        save_messages(
+            conversation,
+            "Another question",
+            "answer",
+            prompt_tokens=5,
+            completion_tokens=3,
+            intent="portal_help",
+        )
+        conversation.refresh_from_db()
+        self.assertEqual(conversation.title, "Existing title")
 
     def test_save_messages_bumps_updated_at(self):
         conversation = Conversation.objects.create()
