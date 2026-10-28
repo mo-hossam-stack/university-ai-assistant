@@ -96,12 +96,12 @@ university-ai-assistant/
 
 ### Backend
 ```bash
-cd backend
-# Setup
-uv venv && source .venv/bin/activate
-uv pip install -e ".[dev]"
+# Setup (from repo root — shared .venv for the whole project)
+uv sync --frozen
+source .venv/bin/activate
 
 # Run
+cd backend
 python manage.py migrate
 python manage.py runserver          # localhost:8000
 
