@@ -247,6 +247,28 @@ cp .env.example .env  # set VITE_API_URL=http://localhost:8000
 npm run dev
 ```
 
+### Environment Variables
+
+The backend validates required variables at startup. A missing required value
+fails `python manage.py check` with the variable name and a fix hint.
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `SECRET_KEY` | Yes | — | Django signing key. Generate one with `python -c "import secrets; print(secrets.token_urlsafe(50))"`. |
+| `DEBUG` | No | `False` | Enables Django debug mode. Use `True` locally. |
+| `ALLOWED_HOSTS` | No | `localhost,127.0.0.1,backend` | Comma-separated hostnames Django serves. |
+| `CSRF_TRUSTED_ORIGINS` | No | localhost origins | Comma-separated origins trusted for CSRF. |
+| `CORS_ALLOWED_ORIGINS` | No | localhost origins | Comma-separated frontend origins allowed to call the API. |
+| `DATABASE_URL` | No | SQLite (`backend/db.sqlite3`) | Database connection URL. Use PostgreSQL in production. |
+| `GROQ_API_KEY` | Yes | — | Groq API key for chat and intent classification. |
+| `GROQ_MODEL` | Yes | — | Groq model used for chat, e.g. `llama-3.3-70b-versatile`. |
+| `GROQ_CLASSIFIER_MODEL` | No | `GROQ_MODEL` | Groq model used for intent classification. |
+| `ANON_THROTTLE_RATE` | No | `30/min` | Per-IP request limit for anonymous users. |
+| `SECURE_SSL_REDIRECT` | No | `True` when `DEBUG=False` | Redirect HTTP requests to HTTPS in production. |
+| `VITE_API_URL` | Yes (local dev) | Same origin | Backend base URL used by the frontend, e.g. `http://localhost:8000`. |
+
+See `backend/.env.example` and `frontend/.env.example` for ready-to-copy templates.
+
 
 
 ## Roadmap
