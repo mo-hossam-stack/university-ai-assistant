@@ -232,11 +232,11 @@ The system prompt anchors the assistant in both Arabic and English, with explici
 ### Setup
 
 ```bash
-# Backend
+# Backend (from repo root — shared .venv for the whole project)
+uv sync --frozen
+source .venv/bin/activate
+cp backend/.env.example backend/.env
 cd backend
-uv venv && source .venv/bin/activate
-uv pip install -r requirements.txt
-cp .env.example .env 
 python manage.py migrate
 python manage.py runserver
 
