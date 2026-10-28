@@ -10,12 +10,6 @@ class ChatRequestSerializer(serializers.Serializer):
     conversation_id = serializers.UUIDField(required=False, allow_null=True, default=None)
 
 
-class ChatResponseSerializer(serializers.Serializer):
-    response = serializers.CharField()
-    conversation_id = serializers.UUIDField()
-    tokens_used = serializers.IntegerField(required=False, default=0)
-
-
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
