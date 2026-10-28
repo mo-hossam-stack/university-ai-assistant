@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from .models import Conversation
 from .serializers import ChatRequestSerializer
 from .services.chat import ChatService
+from .services.conversation import ConversationFull
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,17 @@ def chat_with_unihelp(request: Request) -> Response:
             "AI service is temporarily unavailable.",
             "LLM_API_ERROR",
             status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+    except ConversationFull:
+        logger.warning(
+            "request_id=%s conversation_id=%s is full",
+            request_id,
+            conversation_id,
+        )
+        return _error_response(
+            "Conversation has reached its maximum length.",
+            "CONVERSATION_FULL",
+            status.HTTP_400_BAD_REQUEST,
         )
     except ValueError as e:
         logger.error("request_id=%s config error: %s", request_id, e)
