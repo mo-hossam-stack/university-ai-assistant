@@ -18,6 +18,11 @@ MAX_HISTORY_MESSAGES = 20
 MAX_HISTORY_TOKENS = 6000
 MAX_CONVERSATION_MESSAGES = 500
 
+
+class ConversationFull(Exception):
+    """Raised when a conversation reaches MAX_CONVERSATION_MESSAGES."""
+
+
 HistoryMessage = (
     ChatCompletionUserMessageParam | ChatCompletionAssistantMessageParam
 )
@@ -90,7 +95,7 @@ def save_messages(
     intent: str,
 ) -> None:
     if conversation_size(conversation) + 2 > MAX_CONVERSATION_MESSAGES:
-        raise ValueError("conversation has reached its maximum message count")
+        raise ConversationFull("conversation has reached its maximum message count")
 
     with transaction.atomic():
         Message.objects.bulk_create(
@@ -112,4 +117,8 @@ def save_messages(
             ]
         )
         conversation.updated_at = timezone.now()
-        conversation.save(update_fields=["updated_at"])
+        update_fields = ["updated_at"]
+        if not conversation.title:
+            conversation.title = user_message[:255]
+            update_fields.append("title")
+        conversation.save(update_fields=update_fields)
