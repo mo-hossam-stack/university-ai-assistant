@@ -6,12 +6,13 @@ from typing import Any
 from unittest.mock import patch
 
 from django.core.cache import cache
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 from groq import APIError as GroqAPIError
 from rest_framework import status
 from rest_framework.throttling import SimpleRateThrottle
 from rest_framework.test import APITestCase
 
+from .checks import check_required_env_vars
 from .models import Conversation, Message
 from .services.conversation import load_history, save_messages
 
@@ -256,3 +257,21 @@ class RateLimitTests(APITestCase):
                 self.client.post(url, {"message": "hi"}, format="json")
             resp = self.client.post(url, {"message": "hi"}, format="json")
             self.assertEqual(resp.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+
+
+class RequiredEnvCheckTests(SimpleTestCase):
+    def test_reports_each_missing_required_var(self):
+        with override_settings(SECRET_KEY="", GROQ_API_KEY="", GROQ_MODEL=""):
+            errors = check_required_env_vars(None)
+        self.assertEqual(
+            {error.id for error in errors},
+            {"uniapi.E001", "uniapi.E002", "uniapi.E003"},
+        )
+
+    def test_passes_when_required_vars_are_set(self):
+        with override_settings(
+            SECRET_KEY="test-secret",
+            GROQ_API_KEY="test-key",
+            GROQ_MODEL="test-model",
+        ):
+            self.assertEqual(check_required_env_vars(None), [])
