@@ -9,6 +9,7 @@ from typing import Any
 from unittest.mock import patch
 
 from django.core.cache import cache
+from django.http import Http404
 from django.test import SimpleTestCase, TestCase, override_settings
 from groq import APIError as GroqAPIError
 from rest_framework import status
@@ -16,6 +17,7 @@ from rest_framework.test import APITestCase
 from rest_framework.throttling import SimpleRateThrottle
 
 from .checks import check_required_env_vars
+from .exceptions import api_exception_handler
 from .models import Conversation, Message
 from .services import classifier, knowledge, llm
 from .services.conversation import ConversationFull, load_history, save_messages
@@ -323,6 +325,41 @@ class RateLimitTests(APITestCase):
                 self.client.post(url, {"message": "hi"}, format="json")
             resp = self.client.post(url, {"message": "hi"}, format="json")
             self.assertEqual(resp.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+            self.assertEqual(resp.data["code"], "RATE_LIMITED")
+            self.assertIn("error", resp.data)
+            self.assertIn("Retry-After", resp.headers)
+
+
+@HIGH_RATE
+class ErrorContractTests(APITestCase):
+    def setUp(self):
+        cache.clear()
+        self.url = "/api/chat_with_unihelp/"
+
+    def test_method_not_allowed_uses_error_contract(self):
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(resp.data["code"], "METHOD_NOT_ALLOWED")
+        self.assertIn("error", resp.data)
+        self.assertNotIn("detail", resp.data)
+
+    def test_malformed_json_uses_error_contract(self):
+        resp = self.client.post(
+            self.url, data="{bad", content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.data["code"], "PARSE_ERROR")
+        self.assertIn("error", resp.data)
+        self.assertNotIn("detail", resp.data)
+
+    def test_django_404_is_normalized(self):
+        response = api_exception_handler(Http404(), {})
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["code"], "NOT_FOUND")
+        self.assertIn("error", response.data)
+
+    def test_non_drf_exception_is_left_to_django(self):
+        self.assertIsNone(api_exception_handler(RuntimeError("boom"), {}))
 
 
 class RequiredEnvCheckTests(SimpleTestCase):
