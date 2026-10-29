@@ -16,6 +16,15 @@ dependencies = [
     "whitenoise>=6.7.0",
 ]
 
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+ignore = ["RUF012"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["home", "uniapi"]
+
 [tool.mypy]
 python_version = "3.12"
 strict = false
