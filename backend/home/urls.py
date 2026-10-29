@@ -1,6 +1,6 @@
 from django.contrib import admin
-from django.urls import path, include
 from django.http import HttpRequest, JsonResponse
+from django.urls import include, path
 
 
 def health_check(request: HttpRequest) -> JsonResponse:
