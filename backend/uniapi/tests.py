@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import json
+import tempfile
 import uuid
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import patch
@@ -9,11 +12,12 @@ from django.core.cache import cache
 from django.test import SimpleTestCase, TestCase, override_settings
 from groq import APIError as GroqAPIError
 from rest_framework import status
-from rest_framework.throttling import SimpleRateThrottle
 from rest_framework.test import APITestCase
+from rest_framework.throttling import SimpleRateThrottle
 
 from .checks import check_required_env_vars
 from .models import Conversation, Message
+from .services import classifier, knowledge, llm
 from .services.conversation import ConversationFull, load_history, save_messages
 
 HIGH_RATE = patch.object(
@@ -55,8 +59,13 @@ def _patch_chat(response: SimpleNamespace | Exception) -> Any:
     )
 
 
-def _patch_classifier(intent_value: str = "OUT_OF_SCOPE") -> Any:
+def _patch_classifier(
+    intent_value: str | None = "OUT_OF_SCOPE",
+    error: Exception | None = None,
+) -> Any:
     def create(**kwargs):
+        if error is not None:
+            raise error
         return SimpleNamespace(
             choices=[
                 SimpleNamespace(message=SimpleNamespace(content=intent_value))
@@ -332,3 +341,190 @@ class RequiredEnvCheckTests(SimpleTestCase):
             GROQ_MODEL="test-model",
         ):
             self.assertEqual(check_required_env_vars(None), [])
+
+
+class LLMServiceTests(SimpleTestCase):
+    def setUp(self):
+        llm._client = None
+
+    def tearDown(self):
+        llm._client = None
+
+    @override_settings(GROQ_API_KEY="")
+    def test_missing_api_key_raises_value_error(self):
+        with self.assertRaisesMessage(
+            ValueError, "GROQ_API_KEY is not configured"
+        ):
+            llm.get_groq_client()
+
+    @override_settings(GROQ_API_KEY="test-key")
+    def test_client_is_created_once_and_cached(self):
+        with patch("uniapi.services.llm.Groq") as groq_cls:
+            first = llm.get_groq_client()
+            second = llm.get_groq_client()
+
+        groq_cls.assert_called_once_with(api_key="test-key")
+        self.assertIs(first, second)
+
+
+class ClassifierServiceTests(SimpleTestCase):
+    def setUp(self):
+        classifier._classifier_prompt_cache = None
+
+    def tearDown(self):
+        classifier._classifier_prompt_cache = None
+
+    @override_settings(GROQ_CLASSIFIER_MODEL="test-model")
+    def test_known_intent_is_normalized(self):
+        with _patch_classifier("  COURSE_REGISTRATION \n"):
+            self.assertEqual(
+                classifier.classify_intent("when is registration"),
+                "course_registration",
+            )
+
+    @override_settings(GROQ_CLASSIFIER_MODEL="test-model")
+    def test_unknown_intent_maps_to_out_of_scope(self):
+        with _patch_classifier("banana"):
+            self.assertEqual(
+                classifier.classify_intent("hello"), classifier.OUT_OF_SCOPE
+            )
+
+    @override_settings(GROQ_CLASSIFIER_MODEL="test-model")
+    def test_empty_content_maps_to_out_of_scope(self):
+        with _patch_classifier(None):
+            self.assertEqual(
+                classifier.classify_intent("hello"), classifier.OUT_OF_SCOPE
+            )
+
+    @override_settings(GROQ_CLASSIFIER_MODEL="test-model")
+    def test_groq_error_maps_to_out_of_scope(self):
+        boom = GroqAPIError(
+            "boom", request=SimpleNamespace(), body={"error": {"message": "boom"}}
+        )
+        with _patch_classifier(error=boom):
+            self.assertEqual(
+                classifier.classify_intent("hello"), classifier.OUT_OF_SCOPE
+            )
+
+    @override_settings(GROQ_CLASSIFIER_MODEL=None)
+    def test_missing_model_maps_to_out_of_scope_without_calling_llm(self):
+        with patch(
+            "uniapi.services.classifier.get_groq_client"
+        ) as get_client:
+            self.assertEqual(
+                classifier.classify_intent("hello"), classifier.OUT_OF_SCOPE
+            )
+        get_client.assert_not_called()
+
+    def test_missing_prompt_file_uses_fallback(self):
+        with (
+            tempfile.TemporaryDirectory() as tmp,
+            patch.object(classifier, "PROMPTS_DIR", Path(tmp)),
+        ):
+            prompt = classifier.load_classifier_prompt()
+        self.assertIn("Classify the user query", prompt)
+
+    def test_prompt_is_cached_after_first_read(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "classifier_prompt.md"
+            path.write_text("PROMPT", encoding="utf-8")
+            with patch.object(classifier, "PROMPTS_DIR", Path(tmp)):
+                self.assertEqual(
+                    classifier.load_classifier_prompt(), "PROMPT"
+                )
+                path.write_text("CHANGED", encoding="utf-8")
+                self.assertEqual(
+                    classifier.load_classifier_prompt(), "PROMPT"
+                )
+
+
+class KnowledgeServiceTests(SimpleTestCase):
+    def setUp(self):
+        knowledge._template_cache = None
+        knowledge._per_intent_cache.clear()
+
+    def tearDown(self):
+        knowledge._template_cache = None
+        knowledge._per_intent_cache.clear()
+
+    def test_out_of_scope_returns_empty(self):
+        self.assertEqual(
+            knowledge.load_knowledge_for_intent(knowledge.OUT_OF_SCOPE), ""
+        )
+
+    def test_unknown_intent_returns_empty(self):
+        self.assertEqual(knowledge.load_knowledge_for_intent("banana"), "")
+
+    def test_missing_file_returns_empty(self):
+        with (
+            tempfile.TemporaryDirectory() as tmp,
+            patch.object(knowledge, "DATA_DIR", Path(tmp)),
+        ):
+            self.assertEqual(
+                knowledge.load_knowledge_for_intent("portal_help"), ""
+            )
+
+    def test_malformed_json_returns_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "portal_help.json").write_text(
+                "{not json", encoding="utf-8"
+            )
+            with patch.object(knowledge, "DATA_DIR", Path(tmp)):
+                self.assertEqual(
+                    knowledge.load_knowledge_for_intent("portal_help"), ""
+                )
+
+    def test_valid_file_is_formatted_and_cached(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "portal_help.json"
+            path.write_text(
+                json.dumps({"help": "reset password"}), encoding="utf-8"
+            )
+            with patch.object(knowledge, "DATA_DIR", Path(tmp)):
+                first = knowledge.load_knowledge_for_intent("portal_help")
+                self.assertIn("FILE: portal_help.json", first)
+                self.assertIn("reset password", first)
+                path.write_text("{broken", encoding="utf-8")
+                second = knowledge.load_knowledge_for_intent("portal_help")
+        self.assertEqual(first, second)
+
+    def test_missing_template_uses_fallback(self):
+        with (
+            tempfile.TemporaryDirectory() as tmp,
+            patch.object(knowledge, "PROMPTS_DIR", Path(tmp)),
+        ):
+            template = knowledge.load_template()
+        self.assertIn("helpful university assistant", template)
+
+    def test_template_is_cached_after_first_read(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "unihelp_template.md"
+            path.write_text("TEMPLATE", encoding="utf-8")
+            with patch.object(knowledge, "PROMPTS_DIR", Path(tmp)):
+                self.assertEqual(knowledge.load_template(), "TEMPLATE")
+                path.write_text("CHANGED", encoding="utf-8")
+                self.assertEqual(knowledge.load_template(), "TEMPLATE")
+
+    def test_build_system_prompt_includes_knowledge(self):
+        with (
+            patch.object(knowledge, "load_template", return_value="TEMPLATE"),
+            patch.object(
+                knowledge,
+                "load_knowledge_for_intent",
+                return_value="KNOWLEDGE",
+            ),
+        ):
+            prompt = knowledge.build_system_prompt("portal_help")
+        self.assertIn("TEMPLATE", prompt)
+        self.assertIn("KNOWLEDGE", prompt)
+
+    def test_build_system_prompt_without_knowledge_is_template_only(self):
+        with (
+            patch.object(knowledge, "load_template", return_value="TEMPLATE"),
+            patch.object(
+                knowledge, "load_knowledge_for_intent", return_value=""
+            ),
+        ):
+            self.assertEqual(
+                knowledge.build_system_prompt(knowledge.OUT_OF_SCOPE), "TEMPLATE"
+            )
