@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import logging
 
-from groq import Groq
 from django.conf import settings
+from groq import Groq
 
 logger = logging.getLogger(__name__)
 
