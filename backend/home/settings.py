@@ -140,6 +140,7 @@ GROQ_MODEL = os.getenv("GROQ_MODEL")
 GROQ_CLASSIFIER_MODEL = os.getenv("GROQ_CLASSIFIER_MODEL", GROQ_MODEL)
 
 REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "uniapi.exceptions.api_exception_handler",
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
     ],
