@@ -5,7 +5,6 @@ import time
 import uuid
 
 from django.conf import settings
-
 from groq.types.chat import ChatCompletionMessageParam
 
 from .classifier import classify_intent
