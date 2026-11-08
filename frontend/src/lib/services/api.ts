@@ -14,9 +14,19 @@ interface ChatResponse {
   tokens_used: number
 }
 
-interface ApiError {
+interface ApiErrorResponse {
   error: string
   code?: string
+}
+
+export class ApiError extends Error {
+  code?: string
+
+  constructor(message: string, code?: string) {
+    super(message)
+    this.name = "ApiError"
+    this.code = code
+  }
 }
 
 const apiClient = axios.create({
@@ -29,31 +39,31 @@ const apiClient = axios.create({
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<ApiError>) => {
+  (error: AxiosError<ApiErrorResponse>) => {
     if (error.response) {
       const message = error.response.data?.error || "Server error occurred"
       const status = error.response.status
 
       if (status === 429) {
-        throw new Error("Too many requests. Please wait a moment.")
+        throw new ApiError("Too many requests. Please wait a moment.")
       }
 
       if (status >= 500) {
-        throw new Error("Server is taking a break. Please try again.")
+        throw new ApiError("Server is taking a break. Please try again.")
       }
 
-      throw new Error(message)
+      throw new ApiError(message, error.response.data?.code)
     }
 
     if (error.code === "ECONNABORTED") {
-      throw new Error("Request timed out. Please check your connection.")
+      throw new ApiError("Request timed out. Please check your connection.")
     }
 
     if (!navigator.onLine) {
-      throw new Error("You're offline. Please check your connection.")
+      throw new ApiError("You're offline. Please check your connection.")
     }
 
-    throw new Error("Unable to connect. Please try again.")
+    throw new ApiError("Unable to connect. Please try again.")
   }
 )
 
