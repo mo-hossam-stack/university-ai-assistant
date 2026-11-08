@@ -265,6 +265,7 @@ fails `python manage.py check` with the variable name and a fix hint.
 | `GROQ_CLASSIFIER_MODEL` | No | `GROQ_MODEL` | Groq model used for intent classification. |
 | `ANON_THROTTLE_RATE` | No | `30/min` | Per-IP request limit for anonymous users. |
 | `SECURE_SSL_REDIRECT` | No | `True` when `DEBUG=False` | Redirect HTTP requests to HTTPS in production. |
+| `DJANGO_LOG_LEVEL` | No | `INFO` | Log level for Django framework logs. |
 | `VITE_API_URL` | Yes (local dev) | Same origin | Backend base URL used by the frontend, e.g. `http://localhost:8000`. |
 
 See `backend/.env.example` and `frontend/.env.example` for ready-to-copy templates.
