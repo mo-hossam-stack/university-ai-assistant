@@ -4,7 +4,7 @@ import { WelcomeScreen } from "./WelcomeScreen"
 import { ChatInput } from "./ChatInput"
 import TypingIndicator from "./TypingIndicator"
 import { Toast } from "../common/Toast"
-import { promptOpenai } from "@/lib/services/api"
+import { ApiError, promptOpenai } from "@/lib/services/api"
 import { sanitizeInput } from "@/lib/utils"
 import { ArrowLeft, Trash2 } from "lucide-react"
 import { Button } from "../ui/button"
@@ -27,14 +27,63 @@ interface ChatBotProps {
 }
 
 const MAX_MESSAGES = 50
+const STORAGE_KEY = "unihelp:chat"
+
+type StoredMessage = Omit<Message, "timestamp"> & { timestamp: string }
+
+interface StoredChat {
+  conversationId: string | null
+  messages: Message[]
+}
+
+function isStoredMessage(value: unknown): value is StoredMessage {
+  if (typeof value !== "object" || value === null) return false
+  const message = value as Record<string, unknown>
+  return (
+    typeof message.id === "string" &&
+    typeof message.content === "string" &&
+    (message.role === "user" || message.role === "bot") &&
+    typeof message.timestamp === "string" &&
+    !Number.isNaN(Date.parse(message.timestamp))
+  )
+}
+
+function loadStoredChat(): StoredChat {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return { conversationId: null, messages: [] }
+    const stored = JSON.parse(raw) as Record<string, unknown>
+    const messages = Array.isArray(stored.messages)
+      ? stored.messages
+          .filter(isStoredMessage)
+          .slice(-MAX_MESSAGES)
+          .map((message) => ({
+            ...message,
+            timestamp: new Date(message.timestamp),
+          }))
+      : []
+    return {
+      conversationId:
+        typeof stored.conversationId === "string" ? stored.conversationId : null,
+      messages,
+    }
+  } catch {
+    return { conversationId: null, messages: [] }
+  }
+}
 
 const ChatBot = ({ goHomeRef }: ChatBotProps) => {
-  const [messages, setMessages] = useState<Message[]>([])
+  const [restoredChat] = useState(loadStoredChat)
+  const [messages, setMessages] = useState<Message[]>(restoredChat.messages)
   const [prompt, setPrompt] = useState("")
   const [isBotTyping, setIsBotTyping] = useState(false)
   const [toast, setToast] = useState<ToastState | null>(null)
-  const [showWelcome, setShowWelcome] = useState(true)
-  const [conversationId, setConversationId] = useState<string | null>(null)
+  const [showWelcome, setShowWelcome] = useState(
+    restoredChat.messages.length === 0
+  )
+  const [conversationId, setConversationId] = useState<string | null>(
+    restoredChat.conversationId
+  )
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const generationRef = useRef(0)
 
@@ -51,6 +100,21 @@ const ChatBot = ({ goHomeRef }: ChatBotProps) => {
       goHomeRef.current = handleGoHome
     }
   }, [goHomeRef, handleGoHome])
+
+  useEffect(() => {
+    try {
+      if (conversationId === null && messages.length === 0) {
+        localStorage.removeItem(STORAGE_KEY)
+      } else {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({ conversationId, messages })
+        )
+      }
+    } catch {
+      // localStorage unavailable (private mode/quota) — chat still works in memory
+    }
+  }, [conversationId, messages])
 
   const hasMessages = messages.length > 0
 
@@ -109,9 +173,19 @@ const ChatBot = ({ goHomeRef }: ChatBotProps) => {
       const currentConversationId = conversationId
 
       try {
-        const response = await promptOpenai({
-          message: messageText,
-          conversation_id: currentConversationId,
+        const ask = (conversationId: string | null) =>
+          promptOpenai({ message: messageText, conversation_id: conversationId })
+
+        const response = await ask(currentConversationId).catch((err) => {
+          if (
+            currentConversationId &&
+            err instanceof ApiError &&
+            err.code === "CONVERSATION_NOT_FOUND"
+          ) {
+            setConversationId(null)
+            return ask(null)
+          }
+          throw err
         })
 
         if (generationRef.current !== generation) return
