@@ -270,23 +270,6 @@ fails `python manage.py check` with the variable name and a fix hint.
 
 See `backend/.env.example` and `frontend/.env.example` for ready-to-copy templates.
 
-
-
-## Roadmap
-
-| Phase | Feature | Status |
-|---|---|---|
-| 1 | Single-pass LLM chatbot | Live |
-| 2 | 6 knowledge domains in structured JSON | Live |
-| 3 | Bilingual Arabic/English support | Live |
-| 4 | Dark/light mode, responsive UI | Live |
-| 5 | Intent Classifier -- route queries to domain-specific handlers | Prompt written, pending integration |
-| 6 | Multi-Agent Pipeline -- inject domain JSON as LLM context per query | Architecture designed |
-| 7 | Conversation Memory -- session-based context for follow-up questions | Planned |
-| 8 | Admin Dashboard -- web UI for non-technical staff to update university data | Planned |
-| 9 | Rate Limiting & Abuse Prevention | Planned |
-| 10 | Comprehensive Test Suite (backend unit + frontend component) | Planned |
-
 ---
 ## Contribution 
 feel free to contribute to this project by submitting issues, feature requests, or pull requests. Please follow the code of conduct and ensure that your contributions align with the project's goals and standards.
