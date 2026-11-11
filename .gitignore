@@ -1,8 +1,3 @@
-# Local planning docs (not for the repo/deploy)
-phases.md
-FIXES.md
-workflow.md
-
 # Django #
 *.log
 *.pot
