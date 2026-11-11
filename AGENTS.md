@@ -1,248 +1,218 @@
 # UniHelp AI — Agent Instructions
 
-## Project Overview
-
-UniHelp AI is a bilingual (Arabic/English) AI chatbot for **Nahda University — Faculty of Computers and Information**. It provides instant, grounded academic information to students using structured institutional JSON data injected into LLM prompts.
-
-**Core principle**: The LLM answers only from verified JSON data — no hallucination by design.
+Bilingual (Arabic/English) AI chatbot for **Nahda University — Faculty of Computers
+and Information**. It answers student questions from structured institutional JSON
+injected into the prompt, so the LLM cannot invent university facts.
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+|---|---|
 | Backend | Django 6.0 + DRF 3.16, Python 3.12 |
 | Frontend | React 18.3, TypeScript 5.5, Vite 5.4, Tailwind CSS 4 |
-| LLM | Groq API (Llama 3.3-70B-versatile, temp=0.4, max 600 tokens) |
-| Database | SQLite (dev), PostgreSQL via dj-database-url (prod) |
-| UI Library | shadcn/ui (new-york style, zinc base) |
-| HTTP Client | Axios with interceptors |
-| Markdown | react-markdown for bot responses |
-| Icons | lucide-react |
-| Containers | Docker + Docker Compose (dev + prod) |
-| Frontend Deploy | Netlify (SPA) |
-| Backend Deploy | Railway |
+| LLM | Groq API — model names come from env (`GROQ_MODEL`, `GROQ_CLASSIFIER_MODEL`) |
+| Database | SQLite (dev), PostgreSQL via `dj-database-url` (prod) |
+| UI | shadcn/ui (new-york, zinc), lucide-react, react-markdown |
+| Quality | ruff + mypy (backend), ESLint + `tsc -b` (frontend), 42 Django tests |
+| Deploy | Railway (backend, gunicorn 3 workers), Netlify (SPA), Docker Compose |
 
 ## Project Structure
 
 ```
 university-ai-assistant/
-├── AGENTS.md               # This file — agent instructions
-├── workflow.md             # Full architecture design document
-├── phases.md               # Infrastructure fixes roadmap
-├── pyproject.toml          # Python deps (uv/pip)
-├── requirements.txt        # Pinned Python deps (MUST stay in sync)
-├── Dockerfile.backend      # Multi-stage Python build
-├── Dockerfile.frontend     # Multi-stage Node+Nginx build
-├── docker-compose.yml      # Dev environment
-├── docker-compose.prod.yml # Production environment
+├── AGENTS.md                 # this file
+├── README.md                 # user-facing docs + env table
+├── pyproject.toml / uv.lock  # source of truth for Python deps
+├── requirements.txt          # generated via `uv export` — keep in sync
+├── Dockerfile.backend / Dockerfile.frontend
+├── docker-compose.yml / docker-compose.prod.yml
 │
 ├── backend/
-│   ├── home/               # Django project config
-│   │   ├── settings.py     # Main settings (reads .env)
-│   │   ├── urls.py         # Root URL router → /api/ + /admin/ + /health/
-│   │   ├── wsgi.py
-│   │   └── asgi.py
-│   ├── uniapi/             # Main API app
-│   │   ├── views.py        # Single endpoint: POST /api/chat_with_unihelp/
-│   │   ├── urls.py         # Router for uniapi
-│   │   ├── models.py       # EMPTY — no database models yet
-│   │   └── tests.py        # EMPTY — no tests yet
-│   ├── prompts/
-│   │   ├── unihelp_template.md  # System prompt for UniHelp persona
-│   │   └── classifier_prompt.md # Intent classifier (EXISTS but UNUSED)
-│   ├── data/               # Knowledge base — structured JSON per domain
-│   │   ├── academic_calendar.json
-│   │   ├── course_registration.json
-│   │   ├── exams_timetable.json
-│   │   ├── fees_payments.json
-│   │   ├── portal_help.json
-│   │   └── results_gpa.json
-│   ├── .env                # Secrets (GROQ_API_KEY, SECRET_KEY, etc.)
-│   ├── manage.py
-│   └── db.sqlite3
+│   ├── home/                 # project config
+│   │   ├── settings.py       # env-driven settings, logging, throttle, CORS
+│   │   └── urls.py           # /api/, /admin/, /health/
+│   ├── uniapi/
+│   │   ├── views.py          # thin HTTP layer: validate → ChatService → error map
+│   │   ├── serializers.py    # ChatRequestSerializer + read-only model serializers
+│   │   ├── models.py         # Conversation, Message
+│   │   ├── admin.py          # Conversation admin with Message inline
+│   │   ├── checks.py         # startup checks uniapi.E001–E003
+│   │   ├── exceptions.py     # DRF exception handler
+│   │   ├── tests.py          # the whole backend suite (42 tests)
+│   │   ├── services/
+│   │   │   ├── chat.py       # ChatService — orchestrates classifier → prompt → LLM → save
+│   │   │   ├── classifier.py # intent classification + INTENT_DATA_MAP
+│   │   │   ├── knowledge.py  # JSON loading, per-intent cache, prompt building
+│   │   │   ├── conversation.py # load/create conversation, history bounding, save
+│   │   │   └── llm.py        # lazy Groq client
+│   │   ├── data/             # 6 knowledge JSON files (one per intent)
+│   │   └── prompts/          # unihelp_template.md, classifier_prompt.md
+│   └── .env                  # secrets — never commit
 │
 └── frontend/
     ├── src/
-    │   ├── App.tsx                # Root: Header + ChatBot, theme toggle
-    │   ├── main.tsx               # Entry point
-    │   ├── index.css              # Tailwind + CSS variables (light/dark)
-    │   ├── lib/
-    │   │   ├── utils.ts           # cn(), sanitizeInput(), escapeHtml()
-    │   │   └── services/
-    │   │       └── api.ts         # Axios client → POST /api/chat_with_unihelp/
-    │   └── components/
-    │       ├── chat/
-    │       │   ├── ChatBot.tsx     # Main chat logic, message state, welcome screen
-    │       │   ├── ChatInput.tsx   # Auto-resize textarea, Enter to send
-    │       │   ├── MessageBubble.tsx # Markdown-rendered message with role icon
-    │       │   ├── TypingIndicator.tsx
-    │       │   └── WelcomeScreen.tsx # 6 quick-topic cards
-    │       ├── layout/
-    │       │   └── Header.tsx      # Logo + dark mode toggle
-    │       ├── common/
-    │       │   └── Toast.tsx
-    │       └── ui/                 # shadcn/ui components
-    │           ├── button.tsx
-    │           ├── card.tsx
-    │           ├── badge.tsx
-    │           └── textarea.tsx
-    ├── package.json
-    ├── vite.config.ts
-    ├── nginx.conf            # Reverse proxy → backend:8000
-    └── netlify.toml
+    │   ├── components/chat/    # ChatBot, ChatInput, MessageBubble, WelcomeScreen
+    │   ├── components/layout/  # Header
+    │   ├── components/ui/      # shadcn/ui
+    │   └── lib/services/api.ts # axios client, ApiError
+    ├── nginx.conf / netlify.toml
+    └── package.json
 ```
 
 ## Dev Commands
 
-### Backend
 ```bash
-# Setup (from repo root — shared .venv for the whole project)
+# Backend (shared .venv at repo root)
 uv sync --frozen
 source .venv/bin/activate
-
-# Run
 cd backend
 python manage.py migrate
-python manage.py runserver          # localhost:8000
+python manage.py runserver        # localhost:8000
 
-# With Docker
-docker compose up backend           # localhost:8000
-```
-
-### Frontend
-```bash
+# Frontend
 cd frontend
 npm install
-npm run dev                         # localhost:5173
+npm run dev                       # localhost:5173
 
-# With Docker
-docker compose up frontend          # localhost:5173
+# Full stack
+docker compose up
+docker compose -f docker-compose.prod.yml up
 ```
 
-### Full Stack
-```bash
-docker compose up                   # Both services
-docker compose -f docker-compose.prod.yml up  # Production-like
-```
-
-### Lint & Typecheck
-```bash
-# Frontend
-cd frontend && npm run lint         # ESLint
-cd frontend && npx tsc -b            # TypeScript check (solution-style config)
-
-# Backend
-ruff check backend/                 # Python lint
-ruff format backend/                # Python format
-mypy backend/                       # Type checking (if configured)
-```
-
-## Architecture — Current State
-
-**Single endpoint**: `POST /api/chat_with_unihelp/` → `{"message": "..."}` → `{"response": "..."}`
-
-Flow:
-1. Frontend sends user message to backend
-2. Backend loads system prompt from `prompts/unihelp_template.md`
-3. Backend sends `[system_prompt, user_message]` to Groq API
-4. Backend returns LLM response to frontend
-5. Frontend renders with markdown
-
-**Critical**: Currently stateless — each request is independent. No conversation history, no user identity, no data injection.
-
-## Architecture — Target State
-
-See `workflow.md` for the full target architecture:
-- 5 microservices (Auth, Chatbot, Conversation, Analytics, Knowledge)
-- PostgreSQL + Redis + Celery
-- JWT authentication with university SSO
-- Conversation memory with summarization
-- Token tracking and analytics
-- Multi-college extensibility
-
-## Critical Known Issues
-
-### 1. JSON Data Never Injected Into LLM Context
-The system prompt (`unihelp_template.md`) says "Answer ONLY from the provided JSON data" but the 6 JSON files in `backend/data/` are **never loaded or included** in the prompt sent to Groq. The LLM has no access to the actual knowledge. This is the #1 bug.
-
-### 2. Intent Classifier Unused
-`backend/prompts/classifier_prompt.md` defines an intent classifier that routes queries to domain-specific handlers, but it is never imported or called in any Python file.
-
-### 3. ~~requirements.txt Out of Sync~~ ✅ Fixed
-`pyproject.toml` lists: django, django-cors-headers, djangorestframework, dj-database-url, groq, gunicorn, psycopg, python-dotenv, whitenoise.
-`requirements.txt` is now generated from `uv export` and includes all dependencies with hashes.
-
-### 4. No Database Models
-`backend/uniapi/models.py` is empty. No Conversation, Message, or User models exist.
-
-### 5. No Authentication
-The API endpoint is fully public — no JWT validation, no user identification.
-
-### 6. No Tests
-Both `backend/uniapi/tests.py` and frontend have no test files.
-
-## Code Conventions
-
-### Backend (Python/Django)
-- Django 6.0 patterns with DRF
-- Views use `@api_view` decorators (function-based)
-- Settings read from environment via `python-dotenv`
-- Use `dj-database-url` for database config from `DATABASE_URL` env var
-- System prompts stored as `.md` files in `backend/prompts/`
-- Knowledge base as JSON in `backend/data/`
-- `whitenoise` for static file serving
-
-### Frontend (TypeScript/React)
-- Functional components with `memo()` for performance
-- `useCallback` / `useMemo` for expensive operations
-- Tailwind CSS via `@tailwindcss/vite` plugin (v4)
-- shadcn/ui components in `src/components/ui/`
-- Custom components in `src/components/chat/`, `src/components/layout/`
-- `cn()` utility from `@/lib/utils` for class merging
-- `@/` path alias maps to `src/`
-- Dark mode via CSS class (`.dark` on `<html>`)
-- Theme persisted to `localStorage`
-- Input sanitization on frontend (`sanitizeInput()`) before API calls
-- Error handling via Axios interceptors in `api.ts`
-
-## Environment Variables
+### The green gate — run before claiming any change is done
 
 ```bash
-# Backend (.env)
-SECRET_KEY=...
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-CSRF_TRUSTED_ORIGINS=http://localhost:8000
-CORS_ALLOWED_ORIGINS=http://localhost:5173
-GROQ_API_KEY=gsk_...              # Groq API key
-DATABASE_URL=postgresql://...      # Optional, defaults to SQLite
+cd backend && source ../.venv/bin/activate
+python manage.py check && python manage.py test && ruff check . && mypy .
 
-# Frontend (.env)
-VITE_API_URL=http://localhost:8000 # Backend URL
+cd ../frontend
+npm run lint && npx tsc -b && npm run build
 ```
+
+Expected today: no issues, **42 tests in ~0.3s**, ruff clean, mypy clean, 0 lint
+warnings, `tsc -b` exit 0. If tests take seconds or print `api.groq.com`, a real
+Groq call slipped into the suite — fix that first.
+
+## Architecture
+
+```
+POST /api/chat_with_unihelp/
+  → ChatRequestSerializer (message ≤1000, optional conversation_id UUID)
+  → ChatService.chat()
+      1. load conversation + bounded history (20 msgs / ~6000 tokens)
+      2. classify_intent(user_message) → 1 of 6 domains (or OUT_OF_SCOPE)
+      3. build_system_prompt(intent) → persona + that domain's JSON
+      4. Groq chat.completions.create (system + history + user)
+      5. save_messages() — both messages, token counts, intent, title
+  → {response, conversation_id, tokens_used}
+```
+
+- **Thin view**: all HTTP mapping lives in `views.py`; logic belongs in `services/`.
+- **Stateless-by-ID**: the backend holds no session. The client sends
+  `conversation_id`; unknown IDs are a 404, never a silent new conversation.
+- **Bounded context**: `MAX_HISTORY_MESSAGES = 20`, `MAX_HISTORY_TOKENS = 6000`;
+  a conversation hard-caps at `MAX_CONVERSATION_MESSAGES = 500` (safety net).
+- **Intent → file mapping** is owned by `classifier.py` (`INTENT_DATA_MAP`).
+- **Caching**: `knowledge.py` caches the template and each domain's JSON in-process.
+- **Frontend**: chat state + `conversation_id` persist to `localStorage`
+  (`unihelp:chat`); a stored ID that returns `CONVERSATION_NOT_FOUND` is retried
+  once as a new conversation.
 
 ## API Contract
 
 ```
 POST /api/chat_with_unihelp/
-Request:  { "message": "string" }
-Response: { "response": "string" }
-Error:    { "error": "string" }  (status 500)
-
-GET /health/
-Response: { "status": "healthy" }
+Request:  {"message": "string", "conversation_id": "uuid" | null}
+Response: {"response": "string", "conversation_id": "uuid", "tokens_used": 0}
+Error:    {"error": "human message", "code": "ERROR_CODE"}
 ```
+
+| Code | Status | Meaning |
+|---|---|---|
+| `LLM_AUTH_ERROR` | 503 | Groq key rejected |
+| `LLM_RATE_LIMIT` | 429 | Groq quota |
+| `LLM_MODEL_DECOMMISSIONED` / `LLM_MODEL_ERROR` | 503 | Bad model name |
+| `LLM_API_ERROR` | 503 | Groq transient failure |
+| `LLM_CONFIG_ERROR` | 503 | Missing `GROQ_MODEL` or empty LLM response |
+| `CONVERSATION_NOT_FOUND` | 404 | Unknown `conversation_id` |
+| `CONVERSATION_FULL` | 400 | Message cap reached |
+| `INTERNAL_ERROR` | 500 | Unexpected — logged with a request ID |
+
+Also: `GET /health/` → `{"status": "healthy"}`. Anonymous throttle: 30/min per IP
+(`ANON_THROTTLE_RATE`), 429 with `Retry-After`.
+
+## Testing
+
+- One file: `backend/uniapi/tests.py`. `TestCase`/`APITestCase`, **Groq always
+  mocked** (`unittest.mock.patch` on `get_groq_client` or the client method).
+- Every new branch, guard, or error mapping gets a test — the suite is the only
+  safety net; frontend has no runner yet (see `ROADMAP.md` Phase 6).
+- Never let a test depend on `.env` values: assert against `settings` or override.
+- `manage.py check` requires `SECRET_KEY`, `GROQ_API_KEY`, `GROQ_MODEL`; in a
+  fresh checkout without `.env` it fails by design with `uniapi.E001–E003`.
+
+## Code Conventions
+
+### Backend
+- Function-based views with `@api_view`; keep them free of business logic.
+- Services are plain functions/classes, no Django views imported into them.
+- `from __future__ import annotations` in modules using `X | None` or forward refs.
+- Full type hints; `mypy .` must stay clean. `assert isinstance(...)` where the
+  ORM returns `Any`.
+- Prompts are `.md` files under `uniapi/prompts/`, data is JSON under
+  `uniapi/data/` — never inline a long prompt in Python.
+- Log with `logger.<level>("request_id=%s ...", ...)`; never log secrets or full
+  user messages at INFO in production paths.
+- Error responses always go through `_error_response(message, code, status)`.
+
+### Frontend
+- Functional components, `memo()` where it pays, `useCallback`/`useMemo` for hot paths.
+- `cn()` from `@/lib/utils`; `@/` maps to `src/`.
+- Dark mode = `.dark` class on `<html>`, persisted in `localStorage`.
+- All HTTP goes through `lib/services/api.ts`; throw `ApiError` (carries `code`)
+  so callers can branch on the backend code.
+- Sanitize user input with `sanitizeInput()` before sending.
+- Tailwind v4 via `@tailwindcss/vite` — no `tailwind.config.js`.
+
+## Environment Variables
+
+```bash
+# backend/.env
+SECRET_KEY=            # required (uniapi.E001)
+DEBUG=False
+ALLOWED_HOSTS=localhost,127.0.0.1,backend
+CSRF_TRUSTED_ORIGINS=http://localhost:5173
+CORS_ALLOWED_ORIGINS=http://localhost:5173
+GROQ_API_KEY=gsk_...   # required (uniapi.E002)
+GROQ_MODEL=...         # required (uniapi.E003)
+GROQ_CLASSIFIER_MODEL= # optional, defaults to GROQ_MODEL
+ANON_THROTTLE_RATE=30/min
+DATABASE_URL=          # optional, SQLite otherwise
+DJANGO_LOG_LEVEL=INFO
+SECURE_SSL_REDIRECT=   # forced on when DEBUG=False
+
+# frontend/.env
+VITE_API_URL=http://localhost:8000
+```
+
+`README.md` holds the authoritative table; `backend/.env.example` is the template.
 
 ## Security Notes
 
-- `.env` contains real API keys — must stay in `.gitignore`
-- Frontend input sanitization strips XSS patterns before transmission
-- Backend has CORS whitelist, CSRF protection, HSTS in production
-- `whitenoise` serves static files with compression
-- No rate limiting implemented yet
-- No authentication — anyone can use the chatbot
+- `.env` holds real keys — it is gitignored, never print or commit it.
+- The chat endpoint is **public** (no auth). Only the anonymous throttle limits abuse.
+- Frontend sanitization strips XSS patterns, but treat it as UX, not a security
+  boundary — the backend validates with DRF serializers.
+- Errors never leak stack traces or provider internals; details go to logs with
+  an `X-Request-ID`-derived `request_id`.
+- CORS is an explicit allowlist; CSRF trusted origins are explicit; HSTS and SSL
+  redirect turn on in production.
 
-## Workflow Reference
+## Working Rules
 
-- `workflow.md` — Complete architecture design, target state, data flows, API contracts, database schemas
-- `phases.md` — Ordered infrastructure fixes (no new features until foundation is solid)
+1. Read `ROADMAP.md` before starting anything; work on one PR-scoped item at a time.
+2. Do not rebuild closed work listed at the bottom of `ROADMAP.md`.
+3. Never commit `backend/.env`, local planning notes, or generated `staticfiles/`.
+4. Keep `requirements.txt` in sync with `pyproject.toml` (`uv export --format
+   requirements.txt` after any dependency change) — the Docker build uses the lock.
+5. A change is done only when the green gate passes and new logic has a test.
